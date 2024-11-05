@@ -55,12 +55,6 @@ class MusicBot {
       case "decodetrack":
         await this._handleDecodeTrack(message, args);
         break;
-      case "record":
-        this._handleRecord(message);
-        break;
-      case "stoprecord":
-        this._handleStopRecord(message);
-        break;
       case "play":
         await this._handlePlay(message, args);
         break;
@@ -93,41 +87,6 @@ class MusicBot {
 
     const track = await player.decodeTrack(args);
     message.channel.send(JSON.stringify(track, null, 2));
-  }
-
-  _handleRecord(message) {
-    const player = new FastLink.player.Player(message.guild.id);
-    if (!player.playerCreated()) {
-      message.channel.send("No player found.");
-      return;
-    }
-
-    const voiceEvents = player.listen();
-    voiceEvents.on("endSpeaking", (voice) => {
-      const base64Voice = voice.data;
-      const buffer = Buffer.from(base64Voice, "base64");
-      const previousVoice =
-        fs.readFileSync(`./voice-${message.author.id}.ogg`) || null;
-      fs.writeFileSync(
-        `./voice-${message.author.id}.ogg`,
-        previousVoice ? Buffer.concat([previousVoice, buffer]) : buffer
-      );
-    });
-
-    message.channel.send(
-      "Started recording. Be aware: This will record everything you say in the voice channel, even if the bot is deaf. Server deaf the bot if you don't want to be recorded."
-    );
-  }
-
-  _handleStopRecord(message) {
-    const player = new FastLink.player.Player(message.guild.id);
-    if (!player.playerCreated()) {
-      message.channel.send("No player found.");
-      return;
-    }
-
-    player.stopListen();
-    message.channel.send("Stopped recording.");
   }
 
   async _handlePlay(message, args) {
