@@ -8,6 +8,7 @@
     },
     "dependencies": {
         "@performanc/fastlink": "^2.4.1-rc.1",
-        "discord.js": "^14.16.3"
+        "discord.js": "^14.16.3",
+        "express": "^4.21.1"
     }
 }

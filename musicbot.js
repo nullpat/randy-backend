@@ -1,5 +1,6 @@
 import FastLink from "@performanc/fastlink";
 import Discord from "discord.js";
+import express from "express";
 
 class MusicBot {
   constructor(botId, token) {
@@ -14,7 +15,11 @@ class MusicBot {
         Discord.IntentsBitField.Flags.GuildVoiceStates,
       ],
     });
-
+    this.app = express();
+    this._setupRoutes();
+    this.prefix = "!";
+    this.client.on("messageCreate", this._onMessage.bind(this));
+    this.client.on("raw", (data) => FastLink.other.handleRaw(data));
     this.events = FastLink.node.connectNodes(
       [
         {
@@ -30,15 +35,93 @@ class MusicBot {
         queue: true,
       }
     );
-
     this.events.on("debug", console.log);
-    this.prefix = "!";
-    this._bindEvents();
   }
 
-  _bindEvents() {
-    this.client.on("messageCreate", this._onMessage.bind(this));
-    this.client.on("raw", (data) => FastLink.other.handleRaw(data));
+  _setupRoutes() {
+    this.app.use(express.json());
+
+    this.app.post("/api/play", async (req, res) => {
+      const { guildId, channelId, track } = req.body;
+      const guild = this.client.guilds.cache.get(guildId);
+      if (!guild) return res.status(404).send("Guild not found");
+
+      const channel = guild.channels.cache.get(channelId);
+      if (!channel) return res.status(404).send("Voice channel not found");
+
+      try {
+        const message = {
+          guild,
+          member: { voice: { channel } },
+          content: `!play ${track}`,
+        };
+        await this._handlePlay(message, track);
+        res.send("Track playing");
+      } catch (error) {
+        res.status(500).send(error.message);
+      }
+    });
+
+    this.app.post("/send", async (req, res) => {
+      const { message } = req.body;
+
+      if (!message) {
+        return res.status(400).json({ error: "Message content is required" });
+      }
+
+      try {
+        const channel = await this.client.channels.fetch(
+          process.env.CHANNEL_ID
+        );
+        if (!channel || !channel.isTextBased()) {
+          return res
+            .status(404)
+            .json({ error: "Channel not found or is not text-based" });
+        }
+
+        await channel.send(message);
+        res.json({ status: "Message sent!" });
+      } catch (error) {
+        console.error("Error sending message:", error);
+        res.status(500).json({ error: "Failed to send message" });
+      }
+    });
+
+    this.app.post("/api/pause", (req, res) => {
+      const { guildId } = req.body;
+      const guild = this.client.guilds.cache.get(guildId);
+      if (!guild) return res.status(404).send("Guild not found");
+
+      const message = { guild };
+      this._handlePause(message);
+      res.send("Playback paused");
+    });
+
+    this.app.post("/api/resume", (req, res) => {
+      const { guildId } = req.body;
+      const guild = this.client.guilds.cache.get(guildId);
+      if (!guild) return res.status(404).send("Guild not found");
+
+      const message = { guild };
+      this._handleResume(message);
+      res.send("Playback resumed");
+    });
+
+    this.app.post("/api/stop", (req, res) => {
+      const { guildId } = req.body;
+      const guild = this.client.guilds.cache.get(guildId);
+      if (!guild) return res.status(404).send("Guild not found");
+
+      const message = { guild };
+      this._handleStop(message);
+      res.send("Playback stopped");
+    });
+
+    this.app.listen(process.env.PORT, () => {
+      console.log(
+        "REST API server running on http://localhost:" + process.env.PORT
+      );
+    });
   }
 
   async _onMessage(message) {
@@ -218,7 +301,7 @@ class MusicBot {
   _handleStop(message) {
     const player = new FastLink.player.Player(message.guild.id);
     if (!player.playerCreated()) {
-      message.channel.send("No player found.");
+      // message.channel.send("No player found.");
       return;
     }
 
@@ -228,7 +311,7 @@ class MusicBot {
       },
     });
 
-    message.channel.send("Stopped the player.");
+    // message.channel.send("Stopped the player.");
   }
 
   start() {
