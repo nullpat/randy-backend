@@ -1,11 +1,10 @@
 import FastLink from "@performanc/fastlink";
 import Discord from "discord.js";
-import fs from "fs";
 
 class MusicBot {
-  constructor(token, botId) {
-    this.token = token;
+  constructor(botId, token) {
     this.botId = botId;
+    this.token = token;
     this.client = new Discord.Client({
       partials: [Discord.Partials.Channel],
       intents: [
