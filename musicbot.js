@@ -1,5 +1,5 @@
 import FastLink from "@performanc/fastlink";
-import Discord from "discord.js";
+import { Client, GatewayIntentBits } from "discord.js";
 import express from "express";
 import router from "./src/v1/routes/routes.js";
 
@@ -7,13 +7,13 @@ class MusicBot {
   constructor(botId, token) {
     this.botId = botId;
     this.token = token;
-    this.client = new Discord.Client({
-      partials: [Discord.Partials.Channel],
+    this.client = new Client({
       intents: [
-        Discord.IntentsBitField.Flags.Guilds,
-        Discord.IntentsBitField.Flags.MessageContent,
-        Discord.IntentsBitField.Flags.GuildMessages,
-        Discord.IntentsBitField.Flags.GuildVoiceStates,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildVoiceStates,
       ],
     });
     this.app = express();

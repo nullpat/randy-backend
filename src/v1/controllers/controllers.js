@@ -2,48 +2,99 @@ import services from "../services/services.js";
 
 const getQueue = async (req, res) => {
   if (!req.query.guildId) {
-    res.status(400).send({
-      error: "Query string 'guildId' is missing from url",
-    });
+    res.status(400).send("Query string 'guildId' is missing from url");
     return;
   }
-  const queue = await services.getQueue(req.query.guildId);
-  res.send(queue);
+  try {
+    const queue = await services.getQueue(req.query.guildId);
+    res.send(queue);
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
 };
 
 const pauseQueue = async (req, res) => {
-    // console.log(message)
-  const pauseTheQueueService = await services.pauseQueue(req.query.guildId);
-  res.send(pauseTheQueueService);
+  if (!req.body.guildId) {
+    res
+      .status(400)
+      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    return;
+  }
+  try {
+    const pause = await services.pauseQueue(req.body.guildId);
+    res.send(pause);
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
 };
 
-const resumeQueue = (req, res) => {
-  const resumeTheQueueService = services.getQueue();
-  res.send("Resume the Queue");
+const resumeQueue = async (req, res) => {
+  if (!req.body.guildId) {
+    res
+      .status(400)
+      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    return;
+  }
+  try {
+    const resume = await services.resumeQueue(req.body.guildId);
+    res.send(resume);
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
 };
 
-const stopQueue = (req, res) => {
-  const stopTheQueueService = services.getQueue();
-  res.send("Stop the Queue");
+const clearQueue = async (req, res) => {
+  if (!req.body.guildId) {
+    res
+      .status(400)
+      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    return;
+  }
+  try {
+    const clear = await services.clearQueue(req.body.guildId);
+    res.send(clear);
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
 };
 
-const addSongToQueue = (req, res) => {
-  const addSongToQueueService = services.getQueue();
-  res.send("Add a song to the Queue");
+const addSong = async (req, res) => {
+  if (!req.body.guildId || !req.body.trackUrl) {
+    res
+      .status(400)
+      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    return;
+  }
+  try {
+    const add = await services.addSong(req.body.guildId, req.body.trackUrl);
+    res.send(add);
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
 };
 
-const sendMessage = (req, res) => {
-  const sendMessageService = services.getQueue();
-  res.send("Send a message");
+const skipSong = async (req, res) => {
+  if (!req.body.guildId) {
+    res
+      .status(400)
+      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    return;
+  }
+  try {
+    const skip = await services.skipSong(req.body.guildId);
+    res.send(skip);
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
 };
 
 const controllers = {
   getQueue,
-  addSongToQueue,
-  sendMessage,
   pauseQueue,
   resumeQueue,
-  stopQueue,
+  clearQueue,
+  skipSong,
+  addSong
 };
 
 export default controllers;

@@ -4,7 +4,10 @@ import controllers from "../controllers/controllers.js";
 const router = express.Router();
 
 router.get("/getQueue", controllers.getQueue);
-router.get("/pauseQueue", controllers.pauseQueue);
-router.get("/sendMessage", controllers.getQueue);
+router.patch("/pauseQueue", controllers.pauseQueue);
+router.patch("/resumeQueue", controllers.resumeQueue);
+router.patch("/clearQueue", controllers.clearQueue);
+router.patch("/skipSong", controllers.skipSong);
+router.patch("/addSong", controllers.addSong);
 
 export default router;
