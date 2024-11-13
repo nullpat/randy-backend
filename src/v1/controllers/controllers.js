@@ -59,14 +59,14 @@ const clearQueue = async (req, res, next) => {
 };
 
 const addSong = async (req, res, next) => {
-  if (!req.body.guildId || !req.body.trackUrl) {
+  if (!req.body.guildId || !req.body.track) {
     res
       .status(400)
-      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+      .send("Missing 'Content-Type' header or 'guildId', 'track' parameters in body");
     return;
   }
   try {
-    const add = await services.addSong(req.body.guildId, req.body.trackUrl);
+    const add = await services.addSong(req.body.guildId, req.body.track);
     res.status(200).send(add);
   } catch (err) {
     next(err);

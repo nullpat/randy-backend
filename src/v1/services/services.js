@@ -2,6 +2,8 @@ import FastLink from "@performanc/fastlink";
 
 const getQueue = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
+  if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
+
   const queueRaw = await player.getQueue();
   const queue = await player.decodeTracks(queueRaw);
   return queue;
@@ -9,62 +11,72 @@ const getQueue = async (guildId) => {
 
 const pauseQueue = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
+  if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
+
   player.update({ paused: true });
   return;
 };
 
 const resumeQueue = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
+  if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
+
   player.update({ paused: false });
   return;
 };
 
 const clearQueue = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
+  if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
+
   player.update({ track: { encoded: null } });
   return;
 };
 
 const skipSong = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
+  if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
+
   player.skipTrack();
   return;
 };
 
-const addSong = async (guildId, trackUrl) => {
+const addSong = async (guildId, track) => {
   const player = new FastLink.player.Player(guildId);
-  if (!player.playerCreated()) {
-    return (500);
+  if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
+
+  const loadPrefix = track.startsWith("https://") ? "" : "ytsearch:";
+  const load = await player.loadTrack(loadPrefix + track);
+  const { loadType, data } = load;
+
+  switch (loadType) {
+    case "playlist":
+    case "album":
+    case "station":
+    case "show":
+    case "podcast":
+    case "artist":
+      player.update({
+        tracks: { encodeds: data.tracks.map(({ encoded }) => encoded) },
+      });
+      return `Added ${data.tracks.length} songs from ${data.tracks[0].info.sourceName}.`;
+
+    case "track":
+    case "short":
+      player.update({
+        track: { encoded: data.encoded },
+      });
+      return `Added ${data.info.title} from ${data.info.sourceName}.`;
+
+    case "search":
+      player.update({
+        track: { encoded: data[0].encoded },
+      });
+      return `Added ${data[0].info.title} from ${data[0].info.sourceName} search.`;
+
+    default:
+      throw new Error("Something went wrong! CODE: 2");
   }
-  const loadPrefix = trackUrl.startsWith("https://") ? "" : "ytsearch:";
-  const track = await player.loadTrack(loadPrefix + trackUrl);
-  const { loadType, data } = track;
-  if (
-    ["playlist", "album", "station", "show", "podcast", "artist"].includes(
-      loadType
-    )
-  ) {
-    player.update({
-      tracks: {
-        encodeds: data.tracks.map((track) => track.encoded),
-      },
-    });
-    return `Added ${track.data.tracks.length} songs to the queue, and playing ${track.data.tracks[0].info.title}.`;
-  } else if (["track", "short"].includes(loadType)) {
-    player.update({
-      track: {
-        encoded: data.encoded,
-      },
-    });
-    return `Playing ${track.data.info.title} from ${track.data.info.sourceName}`;
-  } else if (["search"].includes(loadType)) {
-    player.update({
-      track: {
-        encoded: data[0].encoded,
-      },
-    });
-    return `Playing ${track.data[0].info.title} from ${track.data[0].info.sourceName} from search.`;
-  } else return "error";
 };
 
 const services = {

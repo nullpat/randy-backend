@@ -42,6 +42,7 @@ class MusicBot {
   _setupRoutes() {
     this.app.use(express.json());
     this.app.use("/api/v1", router);
+    
     this.app.use((err, req, res, next) => {
       console.error(err.stack);
       const statusCode = err.statusCode || 500;
