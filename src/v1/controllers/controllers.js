@@ -1,19 +1,19 @@
 import services from "../services/services.js";
 
-const getQueue = async (req, res) => {
+const getQueue = async (req, res, next) => {
   if (!req.query.guildId) {
     res.status(400).send("Query string 'guildId' is missing from url");
     return;
   }
   try {
     const queue = await services.getQueue(req.query.guildId);
-    res.send(queue);
-  } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(200).send(queue);
+  } catch (err) {
+    next(err);
   }
 };
 
-const pauseQueue = async (req, res) => {
+const pauseQueue = async (req, res, next) => {
   if (!req.body.guildId) {
     res
       .status(400)
@@ -22,13 +22,13 @@ const pauseQueue = async (req, res) => {
   }
   try {
     const pause = await services.pauseQueue(req.body.guildId);
-    res.send(pause);
-  } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(200).send(pause);
+  } catch (err) {
+    next(err);
   }
 };
 
-const resumeQueue = async (req, res) => {
+const resumeQueue = async (req, res, next) => {
   if (!req.body.guildId) {
     res
       .status(400)
@@ -37,13 +37,13 @@ const resumeQueue = async (req, res) => {
   }
   try {
     const resume = await services.resumeQueue(req.body.guildId);
-    res.send(resume);
-  } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(200).send(resume);
+  } catch (err) {
+    next(err);
   }
 };
 
-const clearQueue = async (req, res) => {
+const clearQueue = async (req, res, next) => {
   if (!req.body.guildId) {
     res
       .status(400)
@@ -52,13 +52,13 @@ const clearQueue = async (req, res) => {
   }
   try {
     const clear = await services.clearQueue(req.body.guildId);
-    res.send(clear);
-  } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(200).send(clear);
+  } catch (err) {
+    next(err);
   }
 };
 
-const addSong = async (req, res) => {
+const addSong = async (req, res, next) => {
   if (!req.body.guildId || !req.body.trackUrl) {
     res
       .status(400)
@@ -67,13 +67,13 @@ const addSong = async (req, res) => {
   }
   try {
     const add = await services.addSong(req.body.guildId, req.body.trackUrl);
-    res.send(add);
-  } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(200).send(add);
+  } catch (err) {
+    next(err);
   }
 };
 
-const skipSong = async (req, res) => {
+const skipSong = async (req, res, next) => {
   if (!req.body.guildId) {
     res
       .status(400)
@@ -82,9 +82,9 @@ const skipSong = async (req, res) => {
   }
   try {
     const skip = await services.skipSong(req.body.guildId);
-    res.send(skip);
-  } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(200).send(skip);
+  } catch (err) {
+    next(err);
   }
 };
 

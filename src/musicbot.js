@@ -41,8 +41,14 @@ class MusicBot {
 
   _setupRoutes() {
     this.app.use(express.json());
-
     this.app.use("/api/v1", router);
+    this.app.use((err, req, res, next) => {
+      console.error(err.stack);
+      const statusCode = err.statusCode || 500;
+      res.status(statusCode).send(
+        "Internal Server Error" //  can do ||  err.message if not running as release mode
+      );
+    });
 
     this.app.post("/api/play", async (req, res) => {
       const { guildId, channelId, track } = req.body;

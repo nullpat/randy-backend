@@ -33,6 +33,9 @@ const skipSong = async (guildId) => {
 
 const addSong = async (guildId, trackUrl) => {
   const player = new FastLink.player.Player(guildId);
+  if (!player.playerCreated()) {
+    return (500);
+  }
   const loadPrefix = trackUrl.startsWith("https://") ? "" : "ytsearch:";
   const track = await player.loadTrack(loadPrefix + trackUrl);
   const { loadType, data } = track;
