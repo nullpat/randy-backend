@@ -1,7 +1,7 @@
 import FastLink from "@performanc/fastlink";
 import { Client, GatewayIntentBits } from "discord.js";
 import express from "express";
-import router from "./src/v1/routes/routes.js";
+import router from "./v1/routes/routes.js";
 
 class MusicBot {
   constructor(botId, token) {
