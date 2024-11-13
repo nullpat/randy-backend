@@ -42,11 +42,6 @@ class MusicBot {
   _setupRoutes() {
     this.app.use(express.json());
 
-    // *** REMOVE ***
-    this.app.get("/", (req, res) => {
-      res.send("<h2>API Server on</h2>");
-    });
-
     this.app.use("/api/v1", router);
 
     this.app.post("/api/play", async (req, res) => {
@@ -142,9 +137,6 @@ class MusicBot {
     const args = message.content.split(" ").slice(1).join(" ");
 
     switch (commandName) {
-      case "decodetrack":
-        await this._handleDecodeTrack(message, args);
-        break;
       case "play":
         await this._handlePlay(message, args);
         break;
@@ -166,17 +158,6 @@ class MusicBot {
       default:
         break;
     }
-  }
-
-  async _handleDecodeTrack(message, args) {
-    const player = new FastLink.player.Player(message.guild.id);
-    if (!player.playerCreated()) {
-      message.channel.send("No player found.");
-      return;
-    }
-
-    const track = await player.decodeTrack(args);
-    message.channel.send(JSON.stringify(track, null, 2));
   }
 
   async _handlePlay(message, args) {
@@ -261,17 +242,6 @@ class MusicBot {
     }
   }
 
-  _handleVolume(message, args) {
-    const player = new FastLink.player.Player(message.guild.id);
-    if (!player.playerCreated()) {
-      message.channel.send("No player found.");
-      return;
-    }
-
-    player.update({ volume: parseInt(args) });
-    message.channel.send(`Volume set to ${parseInt(args)}`);
-  }
-
   _handlePause(message) {
     const player = new FastLink.player.Player(message.guild.id);
     if (!player.playerCreated()) {
@@ -309,7 +279,7 @@ class MusicBot {
   _handleStop(message) {
     const player = new FastLink.player.Player(message.guild.id);
     if (!player.playerCreated()) {
-      // message.channel.send("No player found.");
+      message.channel.send("No player found.");
       return;
     }
 
@@ -319,7 +289,7 @@ class MusicBot {
       },
     });
 
-    // message.channel.send("Stopped the player.");
+    message.channel.send("Stopped the player.");
   }
 
   start() {
