@@ -1,6 +1,7 @@
 import FastLink from "@performanc/fastlink";
 import Discord from "discord.js";
 import express from "express";
+import router from "./src/v1/routes/routes.js";
 
 class MusicBot {
   constructor(botId, token) {
@@ -40,6 +41,13 @@ class MusicBot {
 
   _setupRoutes() {
     this.app.use(express.json());
+
+    // *** REMOVE ***
+    this.app.get("/", (req, res) => {
+      res.send("<h2>API Server on</h2>");
+    });
+
+    this.app.use("/api/v1", router);
 
     this.app.post("/api/play", async (req, res) => {
       const { guildId, channelId, track } = req.body;
