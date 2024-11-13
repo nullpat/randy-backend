@@ -1,5 +1,4 @@
 import FastLink from "@performanc/fastlink";
-
 const getQueue = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
   if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
@@ -30,6 +29,12 @@ const clearQueue = async (guildId) => {
   if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
 
   player.update({ track: { encoded: null } });
+  return;
+};
+
+const joinChannel = async (guildId, channelId) => {
+  const player = new FastLink.player.Player(guildId);
+  if (!player.playerCreated()) player.createPlayer();
   return;
 };
 
@@ -84,8 +89,9 @@ const services = {
   pauseQueue,
   resumeQueue,
   clearQueue,
+  joinChannel,
   skipSong,
-  addSong
+  addSong,
 };
 
 export default services;
