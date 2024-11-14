@@ -32,6 +32,8 @@ const events = FastLink.node.connectNodes(
 
 events.on("debug", console.log);
 
+client.on("raw", (data) => FastLink.other.handleRaw(data));
+
 client.on("messageCreate", async (message) => {
   if (message.author.bot || !message.content.startsWith(prefix)) return;
 
@@ -90,12 +92,17 @@ client.on("messageCreate", async (message) => {
       message.channel.send(volume);
       break;
 
+    case "destroy":
+    case "disconnect":
+    case "stop":
+      const destroy = await services.destroyPlayer(message.guildId);
+      message.channel.send(destroy);
+      break;
+
     default:
       message.channel.send("Unknown command.");
       break;
   }
 });
-
-client.on("raw", (data) => FastLink.other.handleRaw(data));
 
 export { client };

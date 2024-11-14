@@ -18,6 +18,24 @@ const joinChannel = async (req, res, next) => {
   }
 };
 
+const destroyPlayer = async (req, res, next) => {
+  const { guildId } = req.body;
+  if (!guildId) {
+    res
+      .status(400)
+      .send(
+        "Missing 'Content-Type' header or 'guildId' parameter in body"
+      );
+    return;
+  }
+  try {
+    const destroy = await services.destroyPlayer(guildId);
+    res.status(200).send(destroy);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const changeVolume = async (req, res, next) => {
   const { guildId, volume } = req.body;
   if (!guildId || !volume) {
@@ -134,6 +152,7 @@ const addSong = async (req, res, next) => {
 
 const controllers = {
   joinChannel,
+  destroyPlayer,
   changeVolume,
   getQueue,
   pauseQueue,

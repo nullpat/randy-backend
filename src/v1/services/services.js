@@ -8,13 +8,29 @@ const joinChannel = async (guildId, channelId) => {
     client.guilds.cache.get(guildId).shard.send(payload);
   });
   if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
-  return;
+  return `Joined.`;
 };
 
 const getPlayer = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
   if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
   return player;
+};
+
+const destroyPlayer = async (guildId) => {
+  const player = await getPlayer(guildId);
+    const payload = {
+    op: 4,
+    d: {
+      guild_id: guildId,
+      channel_id: null,
+      self_mute: false,
+      self_deaf: false,
+    },
+  };
+  client.guilds.cache.get(guildId).shard.send(payload);
+  player.destroy();
+  return `Disconnected.`;
 };
 
 const changeVolume = async (guildId, volume) => {
@@ -96,6 +112,7 @@ const addSong = async (guildId, track) => {
 const services = {
   joinChannel,
   getPlayer,
+  destroyPlayer,
   changeVolume,
   getQueue,
   pauseQueue,
