@@ -1,5 +1,41 @@
 import services from "../services/services.js";
 
+const joinChannel = async (req, res, next) => {
+  const { guildId, channelId } = req.body;
+  if (!guildId || !channelId) {
+    res
+      .status(400)
+      .send(
+        "Missing 'Content-Type' header or 'guildId', 'channelId' parameters in body"
+      );
+    return;
+  }
+  try {
+    const join = await services.joinChannel(guildId, channelId);
+    res.status(200).send(join);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const changeVolume = async (req, res, next) => {
+  const { guildId, volume } = req.body;
+  if (!guildId || !volume) {
+    res
+      .status(400)
+      .send(
+        "Missing 'Content-Type' header or 'guildId', 'volume' parameters in body"
+      );
+    return;
+  }
+  try {
+    const change = await services.changeVolume(guildId, volume);
+    res.status(200).send(change);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const getQueue = async (req, res, next) => {
   const { guildId } = req.query;
   if (!guildId) {
@@ -62,24 +98,6 @@ const clearQueue = async (req, res, next) => {
   }
 };
 
-const joinChannel = async (req, res, next) => {
-  const { guildId, channelId } = req.body;
-  if (!guildId || !channelId) {
-    res
-      .status(400)
-      .send(
-        "Missing 'Content-Type' header or 'guildId', 'channelId' parameters in body"
-      );
-    return;
-  }
-  try {
-    const add = await services.joinChannel(guildId, channelId);
-    res.status(200).send(add);
-  } catch (err) {
-    next(err);
-  }
-};
-
 const skipSong = async (req, res, next) => {
   const { guildId } = req.body;
   if (!guildId) {
@@ -115,11 +133,12 @@ const addSong = async (req, res, next) => {
 };
 
 const controllers = {
+  joinChannel,
+  changeVolume,
   getQueue,
   pauseQueue,
   resumeQueue,
   clearQueue,
-  joinChannel,
   skipSong,
   addSong,
 };
