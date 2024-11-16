@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/getQueue", controllers.getQueue);
 router.patch("/joinChannel", controllers.joinChannel);
-router.patch("/destroyPlayer", controllers.joinChannel);
+router.patch("/disconnectPlayer", controllers.disconnectPlayer);
 router.patch("/changeVolume", controllers.changeVolume);
 router.patch("/pauseQueue", controllers.pauseQueue);
 router.patch("/resumeQueue", controllers.resumeQueue);

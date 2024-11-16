@@ -17,18 +17,11 @@ const getPlayer = async (guildId) => {
   return player;
 };
 
-const destroyPlayer = async (guildId) => {
+const disconnectPlayer = async (guildId) => {
   const player = await getPlayer(guildId);
-    const payload = {
-    op: 4,
-    d: {
-      guild_id: guildId,
-      channel_id: null,
-      self_mute: false,
-      self_deaf: false,
-    },
-  };
-  client.guilds.cache.get(guildId).shard.send(payload);
+  player.connect(null, null, (guildId, payload) => {
+    client.guilds.cache.get(guildId).shard.send(payload);
+  });
   player.destroy();
   return `Disconnected.`;
 };
@@ -63,13 +56,13 @@ const resumeQueue = async (guildId) => {
 const clearQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   player.update({ track: { encoded: null } });
-  return "Cleared the queue";
+  return "Cleared the queue.";
 };
 
 const skipSong = async (guildId) => {
   const player = await getPlayer(guildId);
   player.skipTrack();
-  return "Skipped current song";
+  return "Skipped current song.";
 };
 
 const addSong = async (guildId, track) => {
@@ -105,14 +98,14 @@ const addSong = async (guildId, track) => {
 
     default:
       // throw new Error("Something went wrong! CODE: 2");
-      return `you sent me garbage and i didnt crash this way`;
+      return `you sent me garbage and i didnt crash this way.`;
   }
 };
 
 const services = {
   joinChannel,
   getPlayer,
-  destroyPlayer,
+  disconnectPlayer,
   changeVolume,
   getQueue,
   pauseQueue,

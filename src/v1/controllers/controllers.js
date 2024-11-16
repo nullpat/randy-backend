@@ -18,7 +18,7 @@ const joinChannel = async (req, res, next) => {
   }
 };
 
-const destroyPlayer = async (req, res, next) => {
+const disconnectPlayer = async (req, res, next) => {
   const { guildId } = req.body;
   if (!guildId) {
     res
@@ -29,7 +29,7 @@ const destroyPlayer = async (req, res, next) => {
     return;
   }
   try {
-    const destroy = await services.destroyPlayer(guildId);
+    const destroy = await services.disconnectPlayer(guildId);
     res.status(200).send(destroy);
   } catch (err) {
     next(err);
@@ -152,7 +152,7 @@ const addSong = async (req, res, next) => {
 
 const controllers = {
   joinChannel,
-  destroyPlayer,
+  disconnectPlayer,
   changeVolume,
   getQueue,
   pauseQueue,

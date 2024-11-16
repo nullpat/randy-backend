@@ -11,7 +11,7 @@ const client = new Client({
   ],
 });
 
-const prefix = "!";
+const prefix = process.env.PREFIX;
 const botId = process.env.DISCORD_ID;
 
 const events = FastLink.node.connectNodes(
@@ -49,7 +49,7 @@ client.on("messageCreate", async (message) => {
       message.channel.send(JSON.stringify(queue, null, 2));
       break;
 
-    case "join":
+    case "move":
       await services.joinChannel(
         message.guildId,
         message.member.voice.channel.id
@@ -57,6 +57,7 @@ client.on("messageCreate", async (message) => {
       break;
 
     case "play":
+    case ">":
       // fastlink is very streamlined, not sure if this is possible, but if we can check if the player is paused, then we can add an if statement here to run the below line only if player state is paused and then ignoring load track WIP
       // player.update({ paused: false }), message.channel.send("Resumed.");
       await services.joinChannel(
@@ -92,10 +93,10 @@ client.on("messageCreate", async (message) => {
       message.channel.send(volume);
       break;
 
-    case "destroy":
     case "disconnect":
+    case "destroy":
     case "stop":
-      const destroy = await services.destroyPlayer(message.guildId);
+      const destroy = await services.disconnectPlayer(message.guildId);
       message.channel.send(destroy);
       break;
 
