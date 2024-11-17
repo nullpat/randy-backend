@@ -89,7 +89,7 @@ client.on("messageCreate", async (message) => {
       break;
 
     case "volume":
-      const volume = await services.changeVolume(message.guildId, args);
+      const volume = await services.changeVolume(message.guildId, args); // add validation for args
       message.channel.send(volume);
       break;
 
