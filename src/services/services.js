@@ -1,5 +1,5 @@
 import FastLink from "@performanc/fastlink";
-import { client } from "./../../musicbot.js";
+import { client } from "../musicbot.js";
 
 const joinChannel = async (guildId, channelId) => {
   const player = new FastLink.player.Player(guildId);

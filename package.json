@@ -9,6 +9,10 @@
     "dependencies": {
         "@performanc/fastlink": "github:PerformanC/FastLink",
         "discord.js": "^14.16.3",
-        "express": "^4.21.1"
+        "errsole": "^2.11.3",
+        "errsole-sqlite": "^2.1.0",
+        "express": "^4.21.1",
+        "winston": "^3.17.0",
+        "winston-errsole": "^1.0.0"
     }
 }

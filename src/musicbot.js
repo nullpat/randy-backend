@@ -1,6 +1,7 @@
 import FastLink from "@performanc/fastlink";
 import { Client, GatewayIntentBits } from "discord.js";
-import services from "../src/v1/services/services.js";
+import services from "./services/services.js";
+import logger from "./utils/logger.js";
 
 const client = new Client({
   intents: [
