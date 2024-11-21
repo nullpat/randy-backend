@@ -13,7 +13,6 @@
             ],
             "program": "${workspaceFolder}\\index",
             "envFile": "${workspaceFolder}\\.env",
-            "outputCapture": "std"
         }
     ]
 }

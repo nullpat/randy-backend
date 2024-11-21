@@ -7,13 +7,13 @@ const joinChannel = async (guildId, channelId) => {
   player.connect(channelId, { mute: false, deaf: true }, (guildId, payload) => {
     client.guilds.cache.get(guildId).shard.send(payload);
   });
-  if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
-  return `Joined.`;
+  return "Joined voice channel.";
 };
 
 const getPlayer = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
-  if (!player.playerCreated()) throw new Error("Something went wrong! CODE: 1");
+  if (!player.playerCreated())
+    throw new Error("Player does not exist in server.");
   return player;
 };
 
@@ -23,7 +23,7 @@ const disconnectPlayer = async (guildId) => {
     client.guilds.cache.get(guildId).shard.send(payload);
   });
   player.destroy();
-  return `Disconnected.`;
+  return "Disconnected.";
 };
 
 const changeVolume = async (guildId, volume) => {
@@ -37,6 +37,9 @@ const changeVolume = async (guildId, volume) => {
 const getQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   const queueRaw = await player.getQueue();
+  if (queueRaw.length == 0) {
+    throw new Error("Queue is empty");
+  }
   const queue = await player.decodeTracks(queueRaw);
   return queue;
 };
@@ -56,13 +59,13 @@ const resumeQueue = async (guildId) => {
 const clearQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   player.update({ track: { encoded: null } });
-  return "Cleared the queue.";
+  return;
 };
 
-const skipSong = async (guildId) => {
+const skipSong = async (guildId, next) => {
   const player = await getPlayer(guildId);
-  player.skipTrack();
-  return "Skipped current song.";
+  const skip = player.skipTrack();
+  return skip;
 };
 
 const addSong = async (guildId, track) => {
@@ -97,8 +100,7 @@ const addSong = async (guildId, track) => {
       return `Added ${data[0].info.title} from ${data[0].info.sourceName} search.`;
 
     default:
-      // throw new Error("Something went wrong! CODE: 2");
-      return `you sent me garbage and i didnt crash this way.`;
+      throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
   }
 };
 
