@@ -1,17 +1,18 @@
 import winston from "winston";
-import WinstonErrsole from "winston-errsole";
+import winstonErrsole from "winston-errsole";
 
 const logger = winston.createLogger({
   level: "debug",
-  transports: [new WinstonErrsole()],
-});
-if (process.env.NODE_ENV !== "production") {
-  logger.add(
+  transports: [
+    new winstonErrsole(),
     new winston.transports.Console({
-      format: winston.format.simple(),
+      format: winston.format.combine(
+        winston.format.colorize({ all: true }),
+        winston.format.simple()
+      ),
       forceConsole: true,
-    })
-  );
-}
+    }),
+  ],
+});
 
 export default logger;
