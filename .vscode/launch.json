@@ -12,7 +12,7 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}\\index",
-            "envFile": "${workspaceFolder}\\.env"
+            "envFile": "${workspaceFolder}\\.env",
         }
     ]
 }

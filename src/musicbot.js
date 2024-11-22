@@ -1,6 +1,7 @@
 import FastLink from "@performanc/fastlink";
 import { Client, GatewayIntentBits } from "discord.js";
-import services from "../src/v1/services/services.js";
+import services from "./services/services.js";
+import logger from "./utils/logger.js";
 
 const client = new Client({
   intents: [
@@ -45,59 +46,112 @@ client.on("messageCreate", async (message) => {
 
   switch (commandName) {
     case "queue":
-      const queue = await services.getQueue(message.guildId);
-      message.channel.send(JSON.stringify(queue, null, 2));
+      try {
+        const queue = await services.getQueue(message.guildId);
+        message.channel.send(JSON.stringify(queue, null, 2));
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
       break;
 
     case "move":
-      await services.joinChannel(
-        message.guildId,
-        message.member.voice.channel.id
-      );
+    case "join":
+      if (!message.member.voice.channel) {
+        message.channel.send("You are not in a voice channel.");
+      } else
+        try {
+          const join = await services.joinChannel(
+            message.guildId,
+            message.member.voice.channel.id
+          );
+          message.channel.send(join);
+        } catch (error) {
+          logger.error(error.stack);
+          message.channel.send(error.message);
+        }
       break;
 
     case "play":
     case ">":
-      // fastlink is very streamlined, not sure if this is possible, but if we can check if the player is paused, then we can add an if statement here to run the below line only if player state is paused and then ignoring load track WIP
-      // player.update({ paused: false }), message.channel.send("Resumed.");
-      await services.joinChannel(
-        message.guildId,
-        message.member.voice.channel.id
-      );
-      const play = await services.addSong(message.guildId, args);
-      message.channel.send(play);
+      if (!message.member.voice.channel) {
+        message.channel.send("You are not in a voice channel.");
+      } else
+        try {
+          const join = await services.joinChannel(
+            message.guildId,
+            message.member.voice.channel.id
+          );
+          const play = await services.addSong(message.guildId, args);
+          message.channel.send(play);
+        } catch (error) {
+          logger.error(error.stack);
+          message.channel.send(error.message);
+        }
       break;
 
     case "pause":
-      const pause = await services.pauseQueue(message.guildId);
-      message.channel.send(pause);
+      try {
+        const pause = await services.pauseQueue(message.guildId);
+        message.channel.send(pause);
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
       break;
 
     case "resume":
-      const resume = await services.resumeQueue(message.guildId);
-      message.channel.send(resume);
+      try {
+        const resume = await services.resumeQueue(message.guildId);
+        message.channel.send(resume);
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
       break;
 
     case "clear":
-      const clear = await services.clearQueue(message.guildId);
-      message.channel.send(clear);
+      try {
+        const clear = await services.clearQueue(message.guildId);
+        message.channel.send(clear);
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
       break;
 
     case "skip":
-      const skip = await services.skipSong(message.guildId);
-      message.channel.send(skip);
+      try {
+        const skip = await services.skipSong(message.guildId);
+        if (skip) message.channel.send("Skipped song.");
+        else
+          message.channel.send("Failed to skip song. Likely 1 song in queue.");
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
       break;
 
     case "volume":
-      const volume = await services.changeVolume(message.guildId, args); // add validation for args
-      message.channel.send(volume);
+      try {
+        const volume = await services.changeVolume(message.guildId, args); // add validation for args
+        message.channel.send(volume);
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
       break;
 
     case "disconnect":
     case "destroy":
     case "stop":
-      const destroy = await services.disconnectPlayer(message.guildId);
-      message.channel.send(destroy);
+      try {
+        const destroy = await services.disconnectPlayer(message.guildId);
+        message.channel.send(destroy);
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
       break;
 
     default:
