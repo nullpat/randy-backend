@@ -34,6 +34,17 @@ const changeVolume = async (guildId, volume) => {
   return `Volume set to ${parseInt(volume)}`;
 };
 
+const getServers = async () => {
+  const servers = client.guilds.cache;
+  return servers;
+};
+
+const getVoiceState = async (guildId) => {
+  const guild = client.guilds.cache.get(guildId);
+  const member = guild.members.cache.get(process.env.DISCORD_ID);
+  return member.voice;
+};
+
 const getQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   const queueRaw = await player.getQueue();
@@ -109,6 +120,8 @@ const services = {
   getPlayer,
   disconnectPlayer,
   changeVolume,
+  getServers,
+  getVoiceState,
   getQueue,
   pauseQueue,
   resumeQueue,

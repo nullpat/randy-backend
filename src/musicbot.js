@@ -134,7 +134,7 @@ client.on("messageCreate", async (message) => {
 
     case "volume":
       try {
-        const volume = await services.changeVolume(message.guildId, args);
+        const volume = await services.changeVolume(message.guildId, args); // add validation for args
         message.channel.send(volume);
       } catch (error) {
         logger.error(error.stack);
