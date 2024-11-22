@@ -13,8 +13,8 @@ const joinChannel = async (req, res, next) => {
   try {
     const join = await services.joinChannel(guildId, channelId);
     res.status(200).send(join);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -31,8 +31,8 @@ const disconnectPlayer = async (req, res, next) => {
   try {
     const destroy = await services.disconnectPlayer(guildId);
     res.status(200).send(destroy);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -49,8 +49,8 @@ const changeVolume = async (req, res, next) => {
   try {
     const change = await services.changeVolume(guildId, volume);
     res.status(200).send(change);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -63,8 +63,8 @@ const getQueue = async (req, res, next) => {
   try {
     const queue = await services.getQueue(guildId);
     res.status(200).send(queue);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -79,8 +79,8 @@ const pauseQueue = async (req, res, next) => {
   try {
     const pause = await services.pauseQueue(guildId);
     res.status(200).send(pause);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -95,8 +95,8 @@ const resumeQueue = async (req, res, next) => {
   try {
     const resume = await services.resumeQueue(guildId);
     res.status(200).send(resume);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -111,8 +111,8 @@ const clearQueue = async (req, res, next) => {
   try {
     const clear = await services.clearQueue(guildId);
     res.status(200).send(clear);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -127,8 +127,8 @@ const skipSong = async (req, res, next) => {
   try {
     const skip = await services.skipSong(guildId);
     res.status(200).send(skip);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -145,8 +145,8 @@ const addSong = async (req, res, next) => {
   try {
     const add = await services.addSong(guildId, track);
     res.status(200).send(add);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
