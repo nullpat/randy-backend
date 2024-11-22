@@ -79,9 +79,13 @@ const skipSong = async (guildId, next) => {
   return skip;
 };
 
-const addSong = async (guildId, track) => {
+const addSong = async (guildId, track, youtube) => {
   const player = await getPlayer(guildId);
-  const loadPrefix = track.startsWith("https://") ? "" : "ytsearch:";
+  const loadPrefix = track.startsWith("https://")
+    ? ""
+    : youtube
+    ? "ytsearch:"
+    : "dzsearch:";
   const load = await player.loadTrack(loadPrefix + track);
   const { loadType, data } = load;
 

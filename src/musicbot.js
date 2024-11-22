@@ -46,6 +46,7 @@ client.on("messageCreate", async (message) => {
 
   switch (commandName) {
     case "queue":
+    case "q":
       try {
         const queue = await services.getQueue(message.guildId);
         message.channel.send(JSON.stringify(queue, null, 2));
@@ -59,35 +60,57 @@ client.on("messageCreate", async (message) => {
     case "join":
       if (!message.member.voice.channel) {
         message.channel.send("You are not in a voice channel.");
-      } else
-        try {
-          const join = await services.joinChannel(
-            message.guildId,
-            message.member.voice.channel.id
-          );
-          message.channel.send(join);
-        } catch (error) {
-          logger.error(error.stack);
-          message.channel.send(error.message);
-        }
+        break;
+      }
+      try {
+        const join = await services.joinChannel(
+          message.guildId,
+          message.member.voice.channel.id
+        );
+        message.channel.send(join);
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
       break;
 
     case "play":
+    case "p":
     case ">":
       if (!message.member.voice.channel) {
         message.channel.send("You are not in a voice channel.");
-      } else
-        try {
-          const join = await services.joinChannel(
-            message.guildId,
-            message.member.voice.channel.id
-          );
-          const play = await services.addSong(message.guildId, args);
-          message.channel.send(play);
-        } catch (error) {
-          logger.error(error.stack);
-          message.channel.send(error.message);
-        }
+        break;
+      }
+      try {
+        const join = await services.joinChannel(
+          message.guildId,
+          message.member.voice.channel.id
+        );
+        const play = await services.addSong(message.guildId, args);
+        message.channel.send(play);
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
+      break;
+
+    case "youtube":
+    case "yt":
+      if (!message.member.voice.channel) {
+        message.channel.send("You are not in a voice channel.");
+        break;
+      }
+      try {
+        const join = await services.joinChannel(
+          message.guildId,
+          message.member.voice.channel.id
+        );
+        const play = await services.addSong(message.guildId, args, true);
+        message.channel.send(play);
+      } catch (error) {
+        logger.error(error.stack);
+        message.channel.send(error.message);
+      }
       break;
 
     case "pause":
