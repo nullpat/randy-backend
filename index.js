@@ -5,6 +5,7 @@ import router from "./src/routes/routes.js";
 import { client } from "./src/musicbot.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 import logger from "./src/utils/logger.js";
+import cors from 'cors';
 
 errsole.initialize({
   storage: new ErrsoleSQLite("./logs.sqlite"),
@@ -31,6 +32,9 @@ const app = express();
 const port = process.env.API_PORT;
 
 app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:5173'
+}));
 app.use("/api", router);
 app.use(errorHandler);
 app.listen(port, () => {
