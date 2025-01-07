@@ -63,6 +63,20 @@ const getServers = async (req, res, next) => {
   }
 };
 
+const getServer = async (req, res, next) => {
+  const { guildId } = req.query;
+  if (!guildId) {
+    res.status(400).send("Query string 'guildId' is missing from url");
+    return;
+  }
+  try {
+    const server = await services.getServer(guildId);
+    res.status(200).send(server);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getVoiceState = async (req, res, next) => {
   const { guildId } = req.query;
   if (!guildId) {
@@ -178,6 +192,7 @@ const controllers = {
   disconnectPlayer,
   changeVolume,
   getServers,
+  getServer,
   getVoiceState,
   getQueue,
   pauseQueue,
