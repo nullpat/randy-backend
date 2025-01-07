@@ -39,6 +39,23 @@ const getServers = async () => {
   return servers;
 };
 
+const getServer = async (guildId) => {
+  const servers = client.guilds.cache;
+  const player = await getPlayer(guildId);
+  const rawQueue = await player.getQueue();
+  if (rawQueue.length == 0) {
+    throw new Error("Queue is empty");
+  }
+  const decodedQueue = await player.decodeTracks(rawQueue);
+  const findServer = servers
+    .filter((server) => server.id === guildId)
+    .map((x) => ({
+      name: x.name,
+      queue: decodedQueue,
+    }));
+  return findServer;
+};
+
 const getVoiceState = async (guildId) => {
   const guild = client.guilds.cache.get(guildId);
   const member = guild.members.cache.get(process.env.DISCORD_ID);
@@ -47,11 +64,11 @@ const getVoiceState = async (guildId) => {
 
 const getQueue = async (guildId) => {
   const player = await getPlayer(guildId);
-  const queueRaw = await player.getQueue();
-  if (queueRaw.length == 0) {
+  const rawQueue = await player.getQueue();
+  if (rawQueue.length == 0) {
     throw new Error("Queue is empty");
   }
-  const queue = await player.decodeTracks(queueRaw);
+  const queue = await player.decodeTracks(rawQueue);
   return queue;
 };
 
@@ -125,6 +142,7 @@ const services = {
   disconnectPlayer,
   changeVolume,
   getServers,
+  getServer,
   getVoiceState,
   getQueue,
   pauseQueue,

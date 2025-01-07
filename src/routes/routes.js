@@ -4,6 +4,7 @@ import controllers from "../controllers/controllers.js";
 const router = express.Router();
 
 router.get("/servers", controllers.getServers);
+router.get("/server", controllers.getServer);
 router.get("/voiceState", controllers.getVoiceState);
 router.get("/queue", controllers.getQueue);
 router.patch("/joinChannel", controllers.joinChannel);
