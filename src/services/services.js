@@ -43,7 +43,7 @@ const getServer = async (guildId) => {
   const servers = client.guilds.cache;
   const player = new FastLink.player.Player(guildId);
 
-  let decodedQueue = null;
+  let decodedQueue = [];
   if (player.playerCreated()) {
     const rawQueue = await player.getQueue();
     if (rawQueue.length > 0) {
