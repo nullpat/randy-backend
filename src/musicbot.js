@@ -31,10 +31,11 @@ const events = FastLink.node.connectNodes(
   }
 );
 
-events.on("debug", console.log);
+// events.on("debug", console.log);
 
 events.on("raw", async (data) => {
-  if (data.op !== "event" || data.type !== "TrackStartEvent") return;
+  console.log(data)
+  if (data.type !== "TrackStartEvent") return;
 
   try {
     const voiceData = await services.getVoice(data.guildId);
