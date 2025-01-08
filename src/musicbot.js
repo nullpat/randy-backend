@@ -1,5 +1,5 @@
 import FastLink from "@performanc/fastlink";
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits, EmbedBuilder } from "discord.js";
 import services from "./services/services.js";
 import logger from "./utils/logger.js";
 
@@ -32,6 +32,38 @@ const events = FastLink.node.connectNodes(
 );
 
 events.on("debug", console.log);
+
+events.on("raw", async (data) => {
+  if (data.op !== "event" || data.type !== "TrackStartEvent") return;
+
+  try {
+    const voiceData = await services.getVoice(data.guildId);
+    const channel = client.channels.cache.get(voiceData.channelId);
+
+    if (!channel || !channel.isTextBased()) {
+      console.error(
+        `Channel Id must exist and allow text: ${voiceData.channelId}`
+      );
+      return;
+    }
+    const { title, author, uri, artworkUrl } = data.track.info;
+    const albumName = data.track.pluginInfo.albumName || "";
+
+    const nowPlaying = new EmbedBuilder()
+      .setTitle("Now Playing")
+      .setURL(uri)
+      .setThumbnail(artworkUrl)
+      .setDescription(
+        `**${title}**
+        ${author}
+        ${albumName}`
+      );
+
+    channel.send({ embeds: [nowPlaying] });
+  } catch (error) {
+    logger.error(error.stack);
+  }
+});
 
 client.on("raw", (data) => FastLink.other.handleRaw(data));
 
@@ -144,6 +176,7 @@ client.on("messageCreate", async (message) => {
       break;
 
     case "skip":
+    case "next":
       try {
         const skip = await services.skipSong(message.guildId);
         if (skip) message.channel.send("Skipped song.");
@@ -167,7 +200,10 @@ client.on("messageCreate", async (message) => {
 
     case "disconnect":
     case "destroy":
+    case "leave":
     case "stop":
+    case "exit":
+    case "end":
       try {
         const destroy = await services.disconnectPlayer(message.guildId);
         message.channel.send(destroy);

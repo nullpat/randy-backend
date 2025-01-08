@@ -61,7 +61,7 @@ const getServer = async (guildId) => {
   return serverInfo;
 };
 
-const getVoiceState = async (guildId) => {
+const getVoice = async (guildId) => {
   const guild = client.guilds.cache.get(guildId);
   const member = guild.members.cache.get(process.env.DISCORD_ID);
   return member.voice;
@@ -134,7 +134,7 @@ const addSong = async (guildId, track, youtube) => {
       player.update({
         track: { encoded: data[0].encoded },
       });
-      return `Added ${data[0].info.title} from ${data[0].info.sourceName} search.`;
+      return `Added ${data[0].info.title} from ${data[0].info.sourceName[0].toUpperCase()}${data[0].info.sourceName.slice(1)} search.`;
 
     default:
       throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
@@ -148,7 +148,7 @@ const services = {
   changeVolume,
   getServers,
   getServer,
-  getVoiceState,
+  getVoice,
   getQueue,
   pauseQueue,
   resumeQueue,
