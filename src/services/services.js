@@ -57,8 +57,8 @@ const getServer = async (guildId) => {
       name: server.name,
       queue: decodedQueue,
     }));
-
-  return serverInfo;
+  const singleServerInfo = serverInfo[0]
+  return singleServerInfo;
 };
 
 const getVoiceState = async (guildId) => {
