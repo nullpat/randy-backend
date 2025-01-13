@@ -19,4 +19,5 @@ async function execute(client) {
   }
   console.log(`Successfully loaded ${client.commands.size} (/) commands.`);
 }
+
 export { name, once, execute };

@@ -1,8 +1,10 @@
-import FastLink from "@performanc/fastlink";
-import { Client, Collection, Events, GatewayIntentBits } from "discord.js";
+import { Client, Collection, GatewayIntentBits } from "discord.js";
 import services from "./services/services.js";
 import logger from "./utils/logger.js";
 import { readdirSync } from "fs";
+
+const prefix = process.env.PREFIX;
+const eventFiles = readdirSync("./src/events");
 
 const client = new Client({
   intents: [
@@ -14,39 +16,15 @@ const client = new Client({
 });
 client.commands = new Collection();
 
-const eventFiles = readdirSync("./src/events");
-
 for (const eventFile of eventFiles) {
   const event = await import(`#events/${eventFile}`);
+
   if (event.once) {
     client.once(event.name, (args) => event.execute(args));
   } else {
     client.on(event.name, (args) => event.execute(args));
   }
 }
-
-const prefix = process.env.PREFIX;
-const botId = process.env.DISCORD_ID;
-
-const lavaClient = FastLink.node.connectNodes(
-  [
-    {
-      hostname: "127.0.0.1",
-      secure: false,
-      password: "youshallnotpass",
-      port: 2333,
-    },
-  ],
-  {
-    botId,
-    shards: 1,
-    queue: true,
-  }
-);
-
-lavaClient.on("debug", console.log);
-
-client.on("raw", (data) => FastLink.other.handleRaw(data));
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot || !message.content.startsWith(prefix)) return;

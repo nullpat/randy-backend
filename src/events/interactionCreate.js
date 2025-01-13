@@ -27,4 +27,5 @@ async function execute(interaction) {
     }
   }
 }
+
 export { name, once, execute };
