@@ -30,11 +30,12 @@ client.login(process.env.DISCORD_TOKEN);
 
 const app = express();
 const port = process.env.API_PORT;
+const frontendUrl = process.env.FRONTEND_URL
 
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: frontendUrl,
   })
 );
 app.use("/api", router);

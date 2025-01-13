@@ -63,7 +63,7 @@ const getServer = async (guildId) => {
 
 const getVoiceState = async (guildId) => {
   const guild = client.guilds.cache.get(guildId);
-  const member = guild.members.cache.get(process.env.DISCORD_ID);
+  const member = guild.members.cache.get(process.env.DISCORD_CLIENT_ID);
   return member.voice;
 };
 

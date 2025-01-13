@@ -1,13 +1,13 @@
 import FastLink from "@performanc/fastlink";
 
 const name = "raw";
-const once = false;
+const runOnce = false;
 
 const lavaHostname = process.env.LAVA_HOSTNAME;
 const lavaSecure = process.env.LAVA_SECURE === "true"
 const lavaPassword = process.env.LAVA_PASSWORD;
 const lavaPort = process.env.LAVA_PORT;
-const botId = process.env.DISCORD_ID;
+const botId = process.env.DISCORD_CLIENT_ID;
 
 const lavaClient = FastLink.node.connectNodes(
   [
@@ -31,4 +31,4 @@ async function execute(data) {
   FastLink.other.handleRaw(data);
 }
 
-export { name, once, execute };
+export { name, runOnce, execute };

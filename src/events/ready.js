@@ -1,7 +1,7 @@
 import { readdirSync } from "fs";
 
 const name = "ready";
-const once = true;
+const runOnce = true;
 
 async function execute(client) {
   const commandFiles = readdirSync("./src/commands");
@@ -20,4 +20,4 @@ async function execute(client) {
   console.log(`Successfully loaded ${client.commands.size} (/) commands.`);
 }
 
-export { name, once, execute };
+export { name, runOnce, execute };

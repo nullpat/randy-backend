@@ -1,5 +1,5 @@
 const name = "interactionCreate";
-const once = false;
+const runOnce = false;
 
 async function execute(interaction) {
   if (!interaction.isChatInputCommand()) return;
@@ -28,4 +28,4 @@ async function execute(interaction) {
   }
 }
 
-export { name, once, execute };
+export { name, runOnce, execute };
