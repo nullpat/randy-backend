@@ -14,50 +14,16 @@ const client = new Client({
 });
 client.commands = new Collection();
 
-async function loadCommands() {
-  const commandFiles = readdirSync("./src/commands");
+const eventFiles = readdirSync("./src/events");
 
-  for (const commandFile of commandFiles) {
-    const command = await import(`#commands/${commandFile}`);
-    if (command.data && command.execute) {
-      client.commands.set(command.data.name, command);
-    } else {
-      console.log(
-        `The ${commandFile} command is missing a required "data" or "execute" property.`
-      );
-    }
+for (const eventFile of eventFiles) {
+  const event = await import(`#events/${eventFile}`);
+  if (event.once) {
+    client.once(event.name, (args) => event.execute(args));
+  } else {
+    client.on(event.name, (args) => event.execute(args));
   }
-  console.log(
-    `Successfully loaded ${client.commands.size} application (/) commands.`
-  );
 }
-
-client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
-  const command = interaction.client.commands.get(interaction.commandName);
-
-  if (!command) {
-    console.error(`No command matching ${interaction.commandName} was found.`);
-    return;
-  }
-
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: "There was an error while executing this command!",
-        flags: MessageFlags.Ephemeral,
-      });
-    } else {
-      await interaction.reply({
-        content: "There was an error while executing this command!",
-        flags: MessageFlags.Ephemeral,
-      });
-    }
-  }
-});
 
 const prefix = process.env.PREFIX;
 const botId = process.env.DISCORD_ID;
@@ -230,4 +196,4 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-export { client, loadCommands };
+export { client };
