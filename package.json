@@ -6,6 +6,10 @@
     "scripts": {
         "start": "node --env-file=.env index"
     },
+    "imports": {
+		"#events/*": "./src/events/*",
+		"#commands/*": "./src/commands/*"
+	},
     "dependencies": {
         "@performanc/fastlink": "github:PerformanC/FastLink",
         "cors": "^2.8.5",

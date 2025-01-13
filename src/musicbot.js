@@ -1,7 +1,8 @@
 import FastLink from "@performanc/fastlink";
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, Collection, Events, GatewayIntentBits } from "discord.js";
 import services from "./services/services.js";
 import logger from "./utils/logger.js";
+import { readdirSync } from "fs";
 
 const client = new Client({
   intents: [
@@ -11,11 +12,57 @@ const client = new Client({
     GatewayIntentBits.GuildVoiceStates,
   ],
 });
+client.commands = new Collection();
+
+async function loadCommands() {
+  const commandFiles = readdirSync("./src/commands");
+
+  for (const commandFile of commandFiles) {
+    const command = await import(`#commands/${commandFile}`);
+    if (command.data && command.execute) {
+      client.commands.set(command.data.name, command);
+    } else {
+      console.log(
+        `The ${commandFile} command is missing a required "data" or "execute" property.`
+      );
+    }
+  }
+  console.log(
+    `Successfully loaded ${client.commands.size} application (/) commands.`
+  );
+}
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+  const command = interaction.client.commands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({
+        content: "There was an error while executing this command!",
+        flags: MessageFlags.Ephemeral,
+      });
+    } else {
+      await interaction.reply({
+        content: "There was an error while executing this command!",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+  }
+});
 
 const prefix = process.env.PREFIX;
 const botId = process.env.DISCORD_ID;
 
-const events = FastLink.node.connectNodes(
+const lavaClient = FastLink.node.connectNodes(
   [
     {
       hostname: "127.0.0.1",
@@ -31,7 +78,7 @@ const events = FastLink.node.connectNodes(
   }
 );
 
-events.on("debug", console.log);
+lavaClient.on("debug", console.log);
 
 client.on("raw", (data) => FastLink.other.handleRaw(data));
 
@@ -183,4 +230,4 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-export { client };
+export { client, loadCommands };

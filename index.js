@@ -2,10 +2,10 @@ import errsole from "errsole";
 import ErrsoleSQLite from "errsole-sqlite";
 import express from "express";
 import router from "./src/routes/routes.js";
-import { client } from "./src/musicbot.js";
+import { client, loadCommands } from "./src/musicbot.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 import logger from "./src/utils/logger.js";
-import cors from 'cors';
+import cors from "cors";
 
 errsole.initialize({
   storage: new ErrsoleSQLite("./logs.sqlite"),
@@ -27,14 +27,17 @@ process.on("warning", (error) => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+loadCommands();
 
 const app = express();
 const port = process.env.API_PORT;
 
 app.use(express.json());
-app.use(cors({
-  origin: 'http://localhost:5173'
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
 app.use("/api", router);
 app.use(errorHandler);
 app.listen(port, () => {
