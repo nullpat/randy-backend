@@ -1,9 +1,14 @@
 import { SlashCommandBuilder } from "discord.js";
+import { execute } from "../commands/play.js";
 
-export const data = new SlashCommandBuilder()
+const data = new SlashCommandBuilder()
   .setName("youtube")
-  .setDescription("Adds a song to the queue, via YouTube search");
+  .setDescription("Adds a song to the queue, via YouTube search")
+  .addStringOption((option) =>
+    option
+      .setName("song")
+      .setDescription("Enter song URL or search")
+      .setRequired(true)
+  );
 
-export async function execute(interaction) {
-  await interaction.reply("Pong!");
-}
+export { data, execute };

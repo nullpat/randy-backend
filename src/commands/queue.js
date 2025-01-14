@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
-import services from "../services/services.js";
-import logger from "../utils/logger.js";
+import { logger } from "../utils/logger.js";
+import { sendReply } from "../helpers/helpers.js";
+import { getQueue } from "../services/services.js";
 
 const data = new SlashCommandBuilder()
   .setName("queue")
@@ -9,20 +10,17 @@ const data = new SlashCommandBuilder()
 async function execute(interaction, message, isMessage) {
   const guildId = isMessage ? message.guildId : interaction.guildId;
 
-  function sendReply(args) {
-    if (isMessage) {
-      message.channel.send(args);
-    } else {
-      interaction.reply(args);
-    }
-  }
-  
   try {
-    const queue = await services.getQueue(guildId);
-    sendReply(`\`\`\`json\n${JSON.stringify(queue, null, 2)}\n\`\`\``);
+    const queue = await getQueue(guildId);
+    sendReply(
+      interaction,
+      message,
+      isMessage,
+      `\`\`\`json\n${JSON.stringify(queue, null, 2)}\n\`\`\``
+    );
   } catch (error) {
     logger.error(error.stack);
-    sendReply(error.message);
+    sendReply(interaction, message, isMessage, error.message);
   }
 }
 

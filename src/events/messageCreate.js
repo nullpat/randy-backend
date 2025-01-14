@@ -1,6 +1,14 @@
 import services from "../services/services.js";
-import logger from "../utils/logger.js";
+import { logger } from "../utils/logger.js";
 import { execute as queueCommand } from "../commands/queue.js";
+import { execute as joinCommand } from "../commands/join.js";
+import { execute as playCommand } from "../commands/play.js";
+import { execute as pauseCommand } from "../commands/pause.js";
+import { execute as resumeCommand } from "../commands/resume.js";
+import { execute as clearCommand } from "../commands/clear.js";
+import { execute as skipCommand } from "../commands/skip.js";
+import { execute as volumeCommand } from "../commands/volume.js";
+import { execute as leaveCommand } from "../commands/leave.js";
 
 const name = "messageCreate";
 const runOnce = false;
@@ -13,7 +21,7 @@ async function execute(message) {
     .split(" ")[0]
     .toLowerCase()
     .substring(prefix.length);
-  const args = message.content.split(" ").slice(1).join(" ");
+  const messageInput = message.content.split(" ").slice(1).join(" ");
 
   switch (commandName) {
     case "q":
@@ -23,113 +31,56 @@ async function execute(message) {
 
     case "move":
     case "join":
+      joinCommand(null, message, true);
       break;
 
-    case "play":
-    case "p":
     case ">":
-      if (!message.member.voice.channel) {
-        message.channel.send("You are not in a voice channel.");
-        break;
-      }
-      try {
-        const join = await services.joinChannel(
-          message.guildId,
-          message.member.voice.channel.id
-        );
-        const play = await services.addSong(message.guildId, args);
-        message.channel.send(play);
-      } catch (error) {
-        logger.error(error.stack);
-        message.channel.send(error.message);
-      }
+    case "play":
+      playCommand(null, message, true, messageInput, false);
       break;
 
-    case "youtube":
     case "yt":
-      if (!message.member.voice.channel) {
-        message.channel.send("You are not in a voice channel.");
-        break;
-      }
-      try {
-        const join = await services.joinChannel(
-          message.guildId,
-          message.member.voice.channel.id
-        );
-        const play = await services.addSong(message.guildId, args, true);
-        message.channel.send(play);
-      } catch (error) {
-        logger.error(error.stack);
-        message.channel.send(error.message);
-      }
+    case "youtube":
+      playCommand(null, message, true, messageInput, true);
       break;
 
+    case "p":
     case "pause":
-      try {
-        const pause = await services.pauseQueue(message.guildId);
-        message.channel.send(pause);
-      } catch (error) {
-        logger.error(error.stack);
-        message.channel.send(error.message);
-      }
+      pauseCommand(null, message, true);
       break;
 
+    case "r":
     case "resume":
-      try {
-        const resume = await services.resumeQueue(message.guildId);
-        message.channel.send(resume);
-      } catch (error) {
-        logger.error(error.stack);
-        message.channel.send(error.message);
-      }
+      resumeCommand(null, message, true);
       break;
 
+    case "c":
     case "clear":
-      try {
-        const clear = await services.clearQueue(message.guildId);
-        message.channel.send(clear);
-      } catch (error) {
-        logger.error(error.stack);
-        message.channel.send(error.message);
-      }
+      clearCommand(null, message, true);
       break;
 
+    case "n":
+    case "s":
     case "next":
     case "skip":
-      try {
-        const skip = await services.skipSong(message.guildId);
-        if (skip) message.channel.send("Skipped song.");
-        else
-          message.channel.send("Failed to skip song. Likely 1 song in queue.");
-      } catch (error) {
-        logger.error(error.stack);
-        message.channel.send(error.message);
-      }
+      skipCommand(null, message, true);
       break;
 
+    case "v":
     case "volume":
-      try {
-        const volume = await services.changeVolume(message.guildId, args); // add validation for args
-        message.channel.send(volume);
-      } catch (error) {
-        logger.error(error.stack);
-        message.channel.send(error.message);
-      }
+      volumeCommand(null, message, true, messageInput);
       break;
 
+    case "<":
+    case "d":
+    case "l":
     case "disconnect":
     case "destroy":
     case "stop":
     case "exit":
     case "end":
     case "leave":
-      try {
-        const destroy = await services.disconnectPlayer(message.guildId);
-        message.channel.send(destroy);
-      } catch (error) {
-        logger.error(error.stack);
-        message.channel.send(error.message);
-      }
+      leaveCommand(null, message, true);
       break;
 
     default:

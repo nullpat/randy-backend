@@ -17,7 +17,7 @@ const getPlayer = async (guildId) => {
   return player;
 };
 
-const disconnectPlayer = async (guildId) => {
+const leaveChannel = async (guildId) => {
   const player = await getPlayer(guildId);
   player.connect(null, null, (guildId, payload) => {
     client.guilds.cache.get(guildId).shard.send(payload);
@@ -57,7 +57,7 @@ const getServer = async (guildId) => {
       name: server.name,
       queue: decodedQueue,
     }));
-  const singleServerInfo = serverInfo[0]
+  const singleServerInfo = serverInfo[0];
   return singleServerInfo;
 };
 
@@ -71,7 +71,7 @@ const getQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   const rawQueue = await player.getQueue();
   if (rawQueue.length == 0) {
-    throw new Error("Queue is empty");
+    return "Queue is empty";
   }
   const queue = await player.decodeTracks(rawQueue);
   return queue;
@@ -92,10 +92,10 @@ const resumeQueue = async (guildId) => {
 const clearQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   player.update({ track: { encoded: null } });
-  return;
+  return "Cleared the queue.";
 };
 
-const skipSong = async (guildId, next) => {
+const skipSong = async (guildId) => {
   const player = await getPlayer(guildId);
   const skip = player.skipTrack();
   return skip;
@@ -144,7 +144,23 @@ const addSong = async (guildId, track, youtube) => {
 const services = {
   joinChannel,
   getPlayer,
-  disconnectPlayer,
+  leaveChannel,
+  changeVolume,
+  getServers,
+  getServer,
+  getVoiceState,
+  getQueue,
+  pauseQueue,
+  resumeQueue,
+  clearQueue,
+  skipSong,
+  addSong,
+};
+
+export {
+  joinChannel,
+  getPlayer,
+  leaveChannel,
   changeVolume,
   getServers,
   getServer,
