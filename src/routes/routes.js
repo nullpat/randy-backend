@@ -8,7 +8,7 @@ router.get("/server", controllers.getServer);
 router.get("/voice", controllers.getVoice);
 router.get("/queue", controllers.getQueue);
 router.patch("/joinChannel", controllers.joinChannel);
-router.patch("/disconnectPlayer", controllers.disconnectPlayer);
+router.patch("/leaveChannel", controllers.leaveChannel);
 router.patch("/changeVolume", controllers.changeVolume);
 router.patch("/pauseQueue", controllers.pauseQueue);
 router.patch("/resumeQueue", controllers.resumeQueue);
