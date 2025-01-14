@@ -1,5 +1,3 @@
-import services from "../services/services.js";
-import { logger } from "../utils/logger.js";
 import { execute as queueCommand } from "../commands/queue.js";
 import { execute as joinCommand } from "../commands/join.js";
 import { execute as playCommand } from "../commands/play.js";
