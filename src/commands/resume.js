@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
-  .setName("ping")
-  .setDescription("Replies with Pong!");
+  .setName("resume")
+  .setDescription("Resumes song playback");
 
 export async function execute(interaction) {
   await interaction.reply("Pong!");

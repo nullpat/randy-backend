@@ -3,11 +3,12 @@ import services from "../services/services.js";
 import logger from "../utils/logger.js";
 
 const data = new SlashCommandBuilder()
-  .setName("queue")
-  .setDescription("Replies with the song queue");
+  .setName("join")
+  .setDescription("Joins your voice channel");
 
 async function execute(interaction, message, isMessage) {
   const guildId = isMessage ? message.guildId : interaction.guildId;
+  const channelId = isMessage ? message.member.voice.channel.id : interaction.guildId;
 
   function sendReply(args) {
     if (isMessage) {
@@ -16,10 +17,20 @@ async function execute(interaction, message, isMessage) {
       interaction.reply(args);
     }
   }
-  
+
+  if (isMessage) {
+    if (!message.member.voice.channel) {
+      message.channel.send("You are not in a voice channel.");
+      return;
+    }
+  }
+
   try {
-    const queue = await services.getQueue(guildId);
-    sendReply(`\`\`\`json\n${JSON.stringify(queue, null, 2)}\n\`\`\``);
+    const join = await services.joinChannel(
+      guildId,
+      channelId
+    );
+    sendReply(join);
   } catch (error) {
     logger.error(error.stack);
     sendReply(error.message);
