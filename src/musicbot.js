@@ -1,7 +1,11 @@
-import { Client, Collection, GatewayIntentBits } from "discord.js";
+import { Client, Collection, EmbedBuilder, GatewayIntentBits } from "discord.js";
 import { readdirSync } from "fs";
+import { lavaClient } from "./events/raw.js";
+import { logger } from "./utils/logger.js";
+import { getVoice } from "./services/services.js";
 
 const eventFiles = readdirSync("./src/events");
+
 
 const client = new Client({
   intents: [
@@ -14,19 +18,21 @@ const client = new Client({
 client.commands = new Collection();
 
 for (const eventFile of eventFiles) {
-  import(`#events/${eventFile}`)
-    .then((event) => {
-      if (event.runOnce) {
-        client.once(event.name, (...args) => event.execute(...args));
-      } else {
-        client.on(event.name, (...args) => event.execute(...args));
+  import(`#events/${eventFile}`).then((event) => {
+    if (event.runOnce) {
+      client.once(event.name, (...args) => event.execute(...args));
+    } else {
+      client.on(event.name, (...args) => event.execute(...args));
+    }
+  });
+}
 
-events.on("raw", async (data) => {
-  console.log(data)
+lavaClient.on("raw", async (data) => {
+  console.log(data);
   if (data.type !== "TrackStartEvent") return;
 
   try {
-    const voiceData = await services.getVoice(data.guildId);
+    const voiceData = await getVoice(data.guildId);
     const channel = client.channels.cache.get(voiceData.channelId);
 
     if (!channel || !channel.isTextBased()) {
@@ -53,12 +59,5 @@ events.on("raw", async (data) => {
     logger.error(error.stack);
   }
 });
-    case "next":
-    case "leave":
-    case "exit":
-    case "end":
-      }
-    })
-}
 
 export { client };

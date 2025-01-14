@@ -148,7 +148,7 @@ const services = {
   changeVolume,
   getServers,
   getServer,
-  getVoiceState,
+  getVoice,
   getQueue,
   pauseQueue,
   resumeQueue,

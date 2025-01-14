@@ -25,10 +25,10 @@ const lavaClient = FastLink.node.connectNodes(
   }
 );
 
-lavaClient.on("debug", console.log);
+// lavaClient.on("debug", console.log);
 
 async function execute(data) {
   FastLink.other.handleRaw(data);
 }
 
-export { name, runOnce, execute };
+export { name, runOnce, execute, lavaClient };
