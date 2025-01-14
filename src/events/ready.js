@@ -1,5 +1,6 @@
 import { readdirSync } from "fs";
 import { REST, Routes } from "discord.js";
+import { logger } from "../utils/logger.js";
 
 const name = "ready";
 const runOnce = true;
@@ -15,7 +16,7 @@ async function execute(client) {
       if (command.data && command.execute) {
         client.commands.set(command.data.name, command);
       } else {
-        console.log(
+        logger.error(
           `The ${commandFile} command is missing a required "data" or "execute" property.`
         );
       }
@@ -32,7 +33,7 @@ async function execute(client) {
         `Successfully deployed ${data.length} application (/) commands.`
       );
     } catch (error) {
-      console.error(error);
+      logger.error(error.stack);
     }
   }
 

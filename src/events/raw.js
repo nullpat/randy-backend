@@ -59,7 +59,7 @@ lavaClient.on("raw", async (data) => {
     }
 
     if (!channel || !channel.isTextBased()) {
-      console.error(
+      logger.error(
         `Channel Id must exist and allow text: ${voiceData.channelId}`
       );
       return;

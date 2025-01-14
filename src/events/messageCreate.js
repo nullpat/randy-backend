@@ -7,6 +7,7 @@ import { execute as clearCommand } from "../commands/clear.js";
 import { execute as skipCommand } from "../commands/skip.js";
 import { execute as volumeCommand } from "../commands/volume.js";
 import { execute as leaveCommand } from "../commands/leave.js";
+import { logger } from "../utils/logger.js";
 
 const name = "messageCreate";
 const runOnce = false;
@@ -27,6 +28,8 @@ async function execute(message) {
       queueCommand(null, message, true);
       break;
 
+    case "m":
+    case "j":
     case "move":
     case "join":
       joinCommand(null, message, true);
@@ -37,6 +40,7 @@ async function execute(message) {
       playCommand(null, message, true, messageInput, false);
       break;
 
+    case "y":
     case "yt":
     case "youtube":
       playCommand(null, message, true, messageInput, true);
@@ -69,9 +73,9 @@ async function execute(message) {
       volumeCommand(null, message, true, messageInput);
       break;
 
-    case "<":
     case "d":
     case "l":
+    case "e":
     case "disconnect":
     case "destroy":
     case "stop":
@@ -82,7 +86,9 @@ async function execute(message) {
       break;
 
     default:
-      message.channel.send("Unknown command.");
+      message.channel.send("Unknown command. You almost certainly forgot the space between the command and the search term. Or you typo'd. Or both.");
+      logger.warn("Unknown command, or one people organically want to use: " + commandName);
+      
       break;
   }
 }

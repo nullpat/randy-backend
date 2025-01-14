@@ -1,9 +1,4 @@
-import {
-  Client,
-  Collection,
-  EmbedBuilder,
-  GatewayIntentBits,
-} from "discord.js";
+import { Client, Collection, GatewayIntentBits } from "discord.js";
 import { readdirSync } from "fs";
 
 const eventFiles = readdirSync("./src/events");
