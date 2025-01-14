@@ -121,14 +121,14 @@ const addSong = async (guildId, track, youtube) => {
       player.update({
         tracks: { encodeds: data.tracks.map(({ encoded }) => encoded) },
       });
-      return `Added ${data.tracks.length} songs from ${data.tracks[0].info.sourceName}.`;
+      return `Added ${data.tracks.length} songs from ${data.tracks[0].info.sourceName[0].toUpperCase()}${data.tracks[0].info.sourceName.slice(1)}.`;
 
     case "track":
     case "short":
       player.update({
         track: { encoded: data.encoded },
       });
-      return `Added ${data.info.title} from ${data.info.sourceName}.`;
+      return `Added ${data.info.title} from ${data.info.sourceName[0].toUpperCase()}${data.info.sourceName.slice(1)}.`;
 
     case "search":
       player.update({
