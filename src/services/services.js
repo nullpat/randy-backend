@@ -77,6 +77,47 @@ const getQueue = async (guildId) => {
   return queue;
 };
 
+const autoLeave = async (guildId) => {
+  let timeoutId = null;
+  let intervalId = null;
+  const timeoutValue = 60000;
+  const intervalValue = 5000;
+
+  const clearTimers = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
+
+  async function checkQueue(guildId) {
+    try {
+      const queue = await getQueue(guildId);
+
+      if (typeof queue !== "object") {
+        if (!timeoutId) {
+          timeoutId = setTimeout(async () => {
+            clearTimers();
+            await leaveChannel(guildId);
+          }, timeoutValue);
+        }
+      } else {
+        clearTimers();
+      }
+    } catch (error) {
+      clearTimers();
+    }
+  }
+
+  intervalId = setInterval(async () => {
+    await checkQueue(guildId);
+  }, intervalValue);
+};
+
 const pauseQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   player.update({ paused: true });
@@ -150,6 +191,7 @@ const services = {
   getServer,
   getVoice,
   getQueue,
+  autoLeave,
   pauseQueue,
   resumeQueue,
   clearQueue,
@@ -166,6 +208,7 @@ export {
   getServer,
   getVoice,
   getQueue,
+  autoLeave,
   pauseQueue,
   resumeQueue,
   clearQueue,
