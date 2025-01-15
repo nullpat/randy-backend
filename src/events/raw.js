@@ -51,7 +51,7 @@ lavaClient.on("raw", async (data) => {
     );
     const selectedChannelId = matchedOverride
       ? matchedOverride.channelId
-      : data.guildId;
+      : voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
 
     if (typeof queue !== "object") {
