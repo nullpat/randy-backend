@@ -42,24 +42,7 @@ const overrideChannels = [
 
 let isFirstStartEvent = true;
 
-lavaClient.on("raw", async (data) => {
-  if (data.type !== "TrackStartEvent" || isFirstStartEvent !== true) return;
-  isFirstStartEvent = false;
-
-  try {
-    const queue = await getQueue(data.guildId);
-    const { title, author } = queue[0].info;
-    client.user.setPresence({
-      activities: [{ name: `${title} - ${author}`, type: 2 }],
-    });
-  } catch (error) {
-    logger.error(error.stack);
-  }
-});
-
-lavaClient.on("raw", async (data) => {
-  if (data.type !== "TrackEndEvent") return;
-
+async function nowPlaying(data) {
   try {
     const voiceData = await getVoice(data.guildId);
     const queue = await getQueue(data.guildId);
@@ -107,6 +90,19 @@ lavaClient.on("raw", async (data) => {
     });
   } catch (error) {
     logger.error(error.stack);
+  }
+}
+
+lavaClient.on("raw", async (data) => {
+  if (data.type === "TrackStartEvent") {
+    if (isFirstStartEvent) {
+      isFirstStartEvent = false;
+      nowPlaying(data);
+    }
+  } else if (data.type === "TrackEndEvent") {
+    nowPlaying(data);
+  } else {
+    return;
   }
 });
 
