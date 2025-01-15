@@ -15,7 +15,7 @@ async function execute(interaction, message, isMessage) {
     const prettyQueue = queue.map((song) => ({
       title: song.info.title,
       author: song.info.author,
-      album: song.pluginInfo.albumName,
+      album: song?.pluginInfo?.albumName,
     }));
     sendReply(
       interaction,
