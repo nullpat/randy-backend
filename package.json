@@ -4,12 +4,13 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "start": "node --env-file=.env index"
+        "start": "node --env-file=.env index",
+        "format": "npx prettier --write ."
     },
     "imports": {
-		"#events/*": "./src/events/*",
-		"#commands/*": "./src/commands/*"
-	},
+        "#events/*": "./src/events/*",
+        "#commands/*": "./src/commands/*"
+    },
     "dependencies": {
         "@performanc/fastlink": "github:PerformanC/FastLink",
         "cors": "^2.8.5",
@@ -19,5 +20,8 @@
         "express": "^4.21.2",
         "winston": "^3.17.0",
         "winston-errsole": "^1.0.0"
+    },
+    "devDependencies": {
+        "prettier": "^3.4.2"
     }
 }
