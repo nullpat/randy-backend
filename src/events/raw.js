@@ -40,6 +40,23 @@ const overrideChannels = [
   },
 ];
 
+let isFirstStartEvent = true;
+
+lavaClient.on("raw", async (data) => {
+  if (data.type !== "TrackStartEvent" || isFirstStartEvent !== true) return;
+  isFirstStartEvent = false;
+
+  try {
+    const queue = await getQueue(data.guildId);
+    const { title, author } = queue[0].info;
+    client.user.setPresence({
+      activities: [{ name: `${title} - ${author}`, type: 2 }],
+    });
+  } catch (error) {
+    logger.error(error.stack);
+  }
+});
+
 lavaClient.on("raw", async (data) => {
   if (data.type !== "TrackEndEvent") return;
 
@@ -55,6 +72,7 @@ lavaClient.on("raw", async (data) => {
     const channel = client.channels.cache.get(selectedChannelId);
 
     if (typeof queue !== "object") {
+      client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
       return;
     }
 
@@ -84,6 +102,9 @@ lavaClient.on("raw", async (data) => {
       );
 
     channel.send({ embeds: [nowPlaying] });
+    client.user.setPresence({
+      activities: [{ name: `${title} - ${author}`, type: 2 }],
+    });
   } catch (error) {
     logger.error(error.stack);
   }
