@@ -77,14 +77,14 @@ const getServer = async (req, res, next) => {
   }
 };
 
-const getVoiceState = async (req, res, next) => {
+const getVoice = async (req, res, next) => {
   const { guildId } = req.query;
   if (!guildId) {
     res.status(400).send("Query string 'guildId' is missing from url");
     return;
   }
   try {
-    const voice = await services.getVoiceState(guildId);
+    const voice = await services.getVoice(guildId);
     res.status(200).send(voice);
   } catch (error) {
     next(error);
@@ -193,7 +193,7 @@ const controllers = {
   changeVolume,
   getServers,
   getServer,
-  getVoiceState,
+  getVoice,
   getQueue,
   pauseQueue,
   resumeQueue,

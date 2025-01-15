@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/servers", controllers.getServers);
 router.get("/server", controllers.getServer);
-router.get("/voiceState", controllers.getVoiceState);
+router.get("/voice", controllers.getVoice);
 router.get("/queue", controllers.getQueue);
 router.patch("/joinChannel", controllers.joinChannel);
 router.patch("/leaveChannel", controllers.leaveChannel);

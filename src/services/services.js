@@ -61,7 +61,7 @@ const getServer = async (guildId) => {
   return singleServerInfo;
 };
 
-const getVoiceState = async (guildId) => {
+const getVoice = async (guildId) => {
   const guild = client.guilds.cache.get(guildId);
   const member = guild.members.cache.get(process.env.DISCORD_CLIENT_ID);
   return member.voice;
@@ -121,20 +121,20 @@ const addSong = async (guildId, track, youtube) => {
       player.update({
         tracks: { encodeds: data.tracks.map(({ encoded }) => encoded) },
       });
-      return `Added ${data.tracks.length} songs from ${data.tracks[0].info.sourceName}.`;
+      return `Added ${data.tracks.length} songs from ${data.tracks[0].info.sourceName[0].toUpperCase()}${data.tracks[0].info.sourceName.slice(1)}.`;
 
     case "track":
     case "short":
       player.update({
         track: { encoded: data.encoded },
       });
-      return `Added ${data.info.title} from ${data.info.sourceName}.`;
+      return `Added ${data.info.title} from ${data.info.sourceName[0].toUpperCase()}${data.info.sourceName.slice(1)}.`;
 
     case "search":
       player.update({
         track: { encoded: data[0].encoded },
       });
-      return `Added ${data[0].info.title} from ${data[0].info.sourceName} search.`;
+      return `Added ${data[0].info.title} from ${data[0].info.sourceName[0].toUpperCase()}${data[0].info.sourceName.slice(1)} search.`;
 
     default:
       throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
@@ -148,7 +148,7 @@ const services = {
   changeVolume,
   getServers,
   getServer,
-  getVoiceState,
+  getVoice,
   getQueue,
   pauseQueue,
   resumeQueue,
@@ -164,7 +164,7 @@ export {
   changeVolume,
   getServers,
   getServer,
-  getVoiceState,
+  getVoice,
   getQueue,
   pauseQueue,
   resumeQueue,

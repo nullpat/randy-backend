@@ -1,10 +1,14 @@
 import FastLink from "@performanc/fastlink";
+import { EmbedBuilder } from "discord.js";
+import { logger } from "../utils/logger.js";
+import { getVoice, getQueue } from "../services/services.js";
+import { client } from "../musicbot.js";
 
 const name = "raw";
 const runOnce = false;
 
 const lavaHostname = process.env.LAVA_HOSTNAME;
-const lavaSecure = process.env.LAVA_SECURE === "true"
+const lavaSecure = process.env.LAVA_SECURE === "true";
 const lavaPassword = process.env.LAVA_PASSWORD;
 const lavaPort = process.env.LAVA_PORT;
 const botId = process.env.DISCORD_CLIENT_ID;
@@ -25,7 +29,65 @@ const lavaClient = FastLink.node.connectNodes(
   }
 );
 
-lavaClient.on("debug", console.log);
+const overrideChannels = [
+  {
+    guildId: "889971568732684298",
+    channelId: "1139615420400291851",
+  },
+  {
+    guildId: "166740556947390465",
+    channelId: "708165175341088828",
+  },
+];
+
+lavaClient.on("raw", async (data) => {
+  if (data.type !== "TrackEndEvent") return;
+
+  try {
+    const voiceData = await getVoice(data.guildId);
+    const queue = await getQueue(data.guildId);
+    const matchedOverride = overrideChannels.find(
+      (override) => override.guildId === data.guildId
+    );
+    const selectedChannelId = matchedOverride
+      ? matchedOverride.channelId
+      : voiceData.channelId;
+    const channel = client.channels.cache.get(selectedChannelId);
+
+    if (typeof queue !== "object") {
+      return;
+    }
+
+    if (!channel || !channel.isTextBased()) {
+      logger.error(
+        `Channel Id must exist and allow text: ${voiceData.channelId}`
+      );
+      return;
+    }
+
+    const { title, author, uri, artworkUrl } = queue[0].info;
+    const albumName = queue[0].pluginInfo.albumName || "";
+
+    const nowPlaying = new EmbedBuilder()
+      .setTitle(title)
+      .setURL(uri)
+      .setAuthor({
+        name: "Now Playing",
+      })
+      .setDescription(
+        `${author}
+        ${albumName}`
+      )
+      .setThumbnail(artworkUrl)
+      .setImage(
+        "https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/qolThings/invis.png"
+      );
+
+    channel.send({ embeds: [nowPlaying] });
+  } catch (error) {
+    logger.error(error.stack);
+  }
+});
 
 async function execute(data) {
   FastLink.other.handleRaw(data);
