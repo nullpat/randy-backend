@@ -82,7 +82,7 @@ async function nowPlaying(data) {
       )
       .setThumbnail(artworkUrl)
       .setImage(
-        "https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/qolThings/invis.png"
+        "https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png"
       );
 
     channel.send({ embeds: [nowPlaying] });
