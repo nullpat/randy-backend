@@ -1,5 +1,6 @@
 import FastLink from "@performanc/fastlink";
 import { client } from "../musicbot.js";
+import errsole from "errsole";
 
 const joinChannel = async (guildId, channelId) => {
   const player = new FastLink.player.Player(guildId);
@@ -109,6 +110,7 @@ const autoLeave = async (guildId) => {
         clearTimers();
       }
     } catch (error) {
+      errsole.warn(error.stack)
       clearTimers();
     }
   }
