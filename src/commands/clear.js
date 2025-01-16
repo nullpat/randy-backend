@@ -3,7 +3,7 @@ import { logger } from "../utils/logger.js";
 import { sendReply } from "../helpers/helpers.js";
 import { clearQueue } from "../services/services.js";
 
-const data = new SlashCommandBuilder().setName("clear").setDescription("Clears the song queue");
+const data = new SlashCommandBuilder().setName("clear").setDescription("Removes all songs from the queue including whats currently playing");
 
 async function execute(interaction, message) {
   const guildId = message ? message.guildId : interaction.guildId;

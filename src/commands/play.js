@@ -6,7 +6,7 @@ import { isFirstStartEvent, toggleFirstStartFalse } from "../../index.js";
 
 const data = new SlashCommandBuilder()
   .setName("play")
-  .setDescription("Adds a song to the queue, via URL or search")
+  .setDescription("Adds a song to the queue, via URL or search (Shortcut is >> not >p because of pause command)")
   .addStringOption((option) => option.setName("song").setDescription("Enter song URL or search").setRequired(true));
 
 async function execute(interaction, message, messageInput, isYT) {

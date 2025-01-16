@@ -14,7 +14,7 @@ async function execute(interaction, message, messageInput) {
   const volumeInput = message ? messageInput : interaction.options.getNumber("volume");
   const guildId = message ? message.guildId : interaction.guildId;
 
-  if (!(volumeInput >= 0 && volumeInput <= 100)) {
+  if (!volumeInput || !(volumeInput >= 0 && volumeInput <= 100)) {
     sendReply(interaction, message, "Invalid input. Enter a number out of 100");
     return;
   }

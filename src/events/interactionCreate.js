@@ -30,11 +30,27 @@ async function execute(interaction) {
       }
     }
   } else if (interaction.isButton()) {
-    try {
-      const command = interaction.client.commands.get("queue");
-      await command.execute(interaction);
-    } catch (error) {
-      logger.error(error.stack);
+    switch (interaction.customId) {
+      case "queue":
+        try {
+          const queueCommand = interaction.client.commands.get("queue");
+          await queueCommand.execute(interaction);
+        } catch (error) {
+          logger.error(error.stack);
+        }
+        break;
+
+      case "hjelp":
+        try {
+          const hjelpCommand = interaction.client.commands.get("hjelp");
+          await hjelpCommand.execute(interaction);
+        } catch (error) {
+          logger.error(error.stack);
+        }
+        break;
+
+      default:
+        break;
     }
   } else {
     return;

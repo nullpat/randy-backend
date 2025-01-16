@@ -1,5 +1,5 @@
 import { execute as queueCommand } from "../commands/queue.js";
-import { execute as joinCommand } from "../commands/join.js";
+import { execute as moveCommand } from "../commands/move.js";
 import { execute as playCommand } from "../commands/play.js";
 import { execute as pauseCommand } from "../commands/pause.js";
 import { execute as resumeCommand } from "../commands/resume.js";
@@ -7,6 +7,7 @@ import { execute as clearCommand } from "../commands/clear.js";
 import { execute as skipCommand } from "../commands/skip.js";
 import { execute as volumeCommand } from "../commands/volume.js";
 import { execute as leaveCommand } from "../commands/leave.js";
+import { execute as hjelpCommand } from "../commands/hjelp.js";
 import { logger } from "../utils/logger.js";
 
 const name = "messageCreate";
@@ -25,11 +26,11 @@ async function execute(message) {
       queueCommand(null, message);
       break;
 
-    case "m":
     case "j":
-    case "move":
+    case "m":
     case "join":
-      joinCommand(null, message);
+    case "move":
+      moveCommand(null, message);
       break;
 
     case ">":
@@ -68,6 +69,12 @@ async function execute(message) {
     case "v":
     case "volume":
       volumeCommand(null, message, messageInput);
+      break;
+
+    case "h":
+    case "help":
+    case "hjelp":
+      hjelpCommand(null, message, messageInput);
       break;
 
     case "d":

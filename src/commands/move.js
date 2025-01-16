@@ -3,7 +3,7 @@ import { logger } from "../utils/logger.js";
 import { sendReply } from "../helpers/helpers.js";
 import { joinChannel } from "../services/services.js";
 
-const data = new SlashCommandBuilder().setName("join").setDescription("Joins your voice channel");
+const data = new SlashCommandBuilder().setName("move").setDescription("Moves to your current voice channel");
 
 async function execute(interaction, message) {
   const guildId = message ? message.guildId : interaction.guildId;

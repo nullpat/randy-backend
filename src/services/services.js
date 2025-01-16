@@ -222,7 +222,8 @@ async function nowPlaying(guildId) {
     const selectedChannelId = matchedOverride ? matchedOverride.channelId : voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
-    const row = new ActionRowBuilder().addComponents(queueButton);
+    const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
+    const row = new ActionRowBuilder().addComponents(queueButton, hjelpButton);
 
     if (typeof queue !== "object") {
       client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });

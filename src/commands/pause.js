@@ -3,7 +3,7 @@ import { logger } from "../utils/logger.js";
 import { sendReply } from "../helpers/helpers.js";
 import { pauseQueue } from "../services/services.js";
 
-const data = new SlashCommandBuilder().setName("pause").setDescription("Pauses song playback");
+const data = new SlashCommandBuilder().setName("pause").setDescription("Pauses playback");
 
 async function execute(interaction, message) {
   const guildId = message ? message.guildId : interaction.guildId;

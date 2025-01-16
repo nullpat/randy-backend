@@ -5,7 +5,7 @@ import { leaveChannel } from "../services/services.js";
 
 const data = new SlashCommandBuilder()
   .setName("leave")
-  .setDescription("Leaves the current voice channel and ends song playback");
+  .setDescription("Leaves the current voice channel and ends playback");
 
 async function execute(interaction, message) {
   const guildId = message ? message.guildId : interaction.guildId;
