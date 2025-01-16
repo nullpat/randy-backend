@@ -8,12 +8,6 @@ const data = new SlashCommandBuilder().setName("queue").setDescription("Replies 
 async function execute(interaction, message) {
   const guildId = message ? message.guildId : interaction.guildId;
 
-  const confirm = new ButtonBuilder().setCustomId("confirm").setLabel("Confirm Ban").setStyle(ButtonStyle.Danger);
-
-  const cancel = new ButtonBuilder().setCustomId("cancel").setLabel("Cancel").setStyle(ButtonStyle.Secondary);
-
-  const row = new ActionRowBuilder().addComponents(cancel, confirm);
-
   try {
     const queue = await getQueue(guildId);
     const prettyQueue = queue.map((song) => ({
@@ -21,19 +15,11 @@ async function execute(interaction, message) {
       author: song.info.author,
       album: song.pluginInfo?.albumName,
     }));
-    sendReply(interaction, message, `\`\`\`json\n${JSON.stringify(prettyQueue, null, 2)}\n\`\`\``, row);
+    sendReply(interaction, message, `\`\`\`json\n${JSON.stringify(prettyQueue, null, 2)}\n\`\`\``);
   } catch (error) {
     logger.error(error.stack);
     sendReply(interaction, message, error.message);
   }
-
-
-
-
-  // await interaction.reply({
-  //   content: `Are you sure you want to ban ${target} for reason: ${reason}?`,
-  //   components: [row],
-  // });
 }
 
 export { data, execute };

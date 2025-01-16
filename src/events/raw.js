@@ -1,5 +1,5 @@
 import FastLink from "@performanc/fastlink";
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { getVoice, getQueue, autoLeave } from "../services/services.js";
 import { client } from "../musicbot.js";
@@ -49,6 +49,8 @@ async function nowPlaying(data) {
     const matchedOverride = overrideChannels.find((override) => override.guildId === data.guildId);
     const selectedChannelId = matchedOverride ? matchedOverride.channelId : voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
+    const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
+    const row = new ActionRowBuilder().addComponents(queueButton);
 
     if (typeof queue !== "object") {
       client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
@@ -77,7 +79,7 @@ async function nowPlaying(data) {
       .setThumbnail(artworkUrl)
       .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
 
-    channel.send({ embeds: [nowPlaying] });
+    channel.send({ embeds: [nowPlaying], components: [row] });
     client.user.setPresence({
       activities: [{ name: `${title} - ${author}`, type: 2 }],
     });
