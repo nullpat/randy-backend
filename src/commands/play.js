@@ -1,7 +1,8 @@
 import { SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { sendReply } from "../helpers/helpers.js";
-import { addSong, joinChannel } from "../services/services.js";
+import { addSong, joinChannel, nowPlaying } from "../services/services.js";
+import { isFirstStartEvent, toggleFirstStartFalse } from "../../index.js";
 
 const data = new SlashCommandBuilder()
   .setName("play")
@@ -24,6 +25,11 @@ async function execute(interaction, message, messageInput, isYT) {
     const join = await joinChannel(guildId, channelId);
     const play = await addSong(guildId, songInput, isYT);
     sendReply(interaction, message, play);
+
+    if (isFirstStartEvent) {
+      toggleFirstStartFalse();
+      nowPlaying(guildId);
+    }
   } catch (error) {
     logger.error(error.stack);
     sendReply(interaction, message, error.message);

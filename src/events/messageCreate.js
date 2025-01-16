@@ -84,7 +84,7 @@ async function execute(message) {
 
     default:
       message.channel.send(
-        "Unknown command. You almost certainly forgot the space between the command and the search term. Or you typo'd. Or both.",
+        "Unknown command. You probably forgot the space between the command and the search term. Or you added a space. Or you typo'd. Yeah you'd do that wouldn't you..",
       );
       logger.warn("Unknown command, or one people organically want to use: " + commandName);
 

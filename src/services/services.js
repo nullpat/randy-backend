@@ -1,6 +1,9 @@
 import FastLink from "@performanc/fastlink";
-import { client } from "../musicbot.js";
 import errsole from "errsole";
+import { client } from "../musicbot.js";
+import { toggleFirstStartTrue } from "../../index.js";
+import { logger } from "../utils/logger.js";
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 
 const joinChannel = async (guildId, channelId) => {
   const player = new FastLink.player.Player(guildId);
@@ -23,6 +26,8 @@ const leaveChannel = async (guildId) => {
     client.guilds.cache.get(guildId).shard.send(payload);
   });
   player.destroy();
+  toggleFirstStartTrue();
+  client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
   return "Disconnected.";
 };
 
@@ -102,6 +107,7 @@ const autoLeave = async (guildId) => {
         if (!timeoutId) {
           timeoutId = setTimeout(async () => {
             clearTimers();
+            toggleFirstStartTrue();
             await leaveChannel(guildId);
           }, timeoutValue);
         }
@@ -134,6 +140,7 @@ const resumeQueue = async (guildId) => {
 const clearQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   player.update({ track: { encoded: null } });
+  toggleFirstStartTrue();
   return "Cleared the queue.";
 };
 
@@ -159,7 +166,7 @@ const addSong = async (guildId, track, youtube) => {
       player.update({
         tracks: { encodeds: data.tracks.map(({ encoded }) => encoded) },
       });
-      const formattedPlaylistSource = formatSource(data.tracks[0].info.sourceName)
+      const formattedPlaylistSource = formatSource(data.tracks[0].info.sourceName);
       return `Added ${data.tracks.length} songs from ${formattedPlaylistSource}.`;
 
     case "track":
@@ -167,7 +174,7 @@ const addSong = async (guildId, track, youtube) => {
       player.update({
         track: { encoded: data.encoded },
       });
-      const formattedTrackSource = formatSource(data.info.sourceName)
+      const formattedTrackSource = formatSource(data.info.sourceName);
       return `Added ${data.info.title} from ${formattedTrackSource}.`;
 
     case "search":
@@ -197,6 +204,62 @@ const formatSource = (sourceName) => {
   }
 };
 
+async function nowPlaying(guildId) {
+  const overrideChannels = [
+    {
+      guildId: "889971568732684298",
+      channelId: "1139615420400291851",
+    },
+    {
+      guildId: "166740556947390465",
+      channelId: "708165175341088828",
+    },
+  ];
+  try {
+    const voiceData = await getVoice(guildId);
+    const queue = await getQueue(guildId);
+    const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
+    const selectedChannelId = matchedOverride ? matchedOverride.channelId : voiceData.channelId;
+    const channel = client.channels.cache.get(selectedChannelId);
+    const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
+    const row = new ActionRowBuilder().addComponents(queueButton);
+
+    if (typeof queue !== "object") {
+      client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
+      autoLeave(guildId);
+      return;
+    }
+
+    if (!channel || !channel.isTextBased()) {
+      logger.error(`Channel Id must exist and allow text: ${voiceData.channelId}`);
+      return;
+    }
+
+    const { title, author, uri, artworkUrl } = queue[0].info;
+    const albumName = queue[0].pluginInfo.albumName || "";
+
+    const nowPlaying = new EmbedBuilder()
+      .setTitle(title)
+      .setURL(uri)
+      .setAuthor({
+        name: "Now Playing",
+      })
+      .setDescription(
+        `${author}
+        ${albumName}`,
+      )
+      .setThumbnail(artworkUrl)
+      .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
+
+    channel.send({ embeds: [nowPlaying], components: [row] });
+    client.user.setPresence({
+      activities: [{ name: `${title} - ${author}`, type: 2 }],
+    });
+  } catch (error) {
+    logger.error(error.stack);
+  }
+}
+
 const services = {
   joinChannel,
   getPlayer,
@@ -213,6 +276,7 @@ const services = {
   skipSong,
   addSong,
   formatSource,
+  nowPlaying,
 };
 
 export {
@@ -231,6 +295,7 @@ export {
   skipSong,
   addSong,
   formatSource,
+  nowPlaying,
 };
 
 export default services;
