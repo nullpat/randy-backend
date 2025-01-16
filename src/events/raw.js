@@ -26,7 +26,7 @@ const lavaClient = FastLink.node.connectNodes(
     botId,
     shards: 1,
     queue: true,
-  }
+  },
 );
 
 const overrideChannels = [
@@ -46,12 +46,8 @@ async function nowPlaying(data) {
   try {
     const voiceData = await getVoice(data.guildId);
     const queue = await getQueue(data.guildId);
-    const matchedOverride = overrideChannels.find(
-      (override) => override.guildId === data.guildId
-    );
-    const selectedChannelId = matchedOverride
-      ? matchedOverride.channelId
-      : voiceData.channelId;
+    const matchedOverride = overrideChannels.find((override) => override.guildId === data.guildId);
+    const selectedChannelId = matchedOverride ? matchedOverride.channelId : voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
 
     if (typeof queue !== "object") {
@@ -61,9 +57,7 @@ async function nowPlaying(data) {
     }
 
     if (!channel || !channel.isTextBased()) {
-      logger.error(
-        `Channel Id must exist and allow text: ${voiceData.channelId}`
-      );
+      logger.error(`Channel Id must exist and allow text: ${voiceData.channelId}`);
       return;
     }
 
@@ -78,12 +72,10 @@ async function nowPlaying(data) {
       })
       .setDescription(
         `${author}
-        ${albumName}`
+        ${albumName}`,
       )
       .setThumbnail(artworkUrl)
-      .setImage(
-        "https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png"
-      );
+      .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
 
     channel.send({ embeds: [nowPlaying] });
     client.user.setPresence({

@@ -17,9 +17,7 @@ async function execute(client) {
       if (command.data && command.execute) {
         client.commands.set(command.data.name, command);
       } else {
-        logger.error(
-          `The ${commandFile} command is missing a required "data" or "execute" property.`
-        );
+        logger.error(`The ${commandFile} command is missing a required "data" or "execute" property.`);
       }
     });
   }
@@ -30,9 +28,7 @@ async function execute(client) {
       const data = await rest.put(Routes.applicationCommands(clientId), {
         body: commandData,
       });
-      console.log(
-        `Successfully deployed ${data.length} application (/) commands.`
-      );
+      console.log(`Successfully deployed ${data.length} application (/) commands.`);
     } catch (error) {
       logger.error(error.stack);
     }

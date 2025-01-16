@@ -7,25 +7,15 @@ const data = new SlashCommandBuilder()
   .setName("volume")
   .setDescription("Sets the volume to a number out of 100")
   .addNumberOption((option) =>
-    option
-      .setName("volume")
-      .setDescription("Sets the volume to a number out of 100")
-      .setRequired(true)
+    option.setName("volume").setDescription("Sets the volume to a number out of 100").setRequired(true),
   );
 
 async function execute(interaction, message, isMessage, messageInput) {
-  const volumeInput = isMessage
-    ? messageInput
-    : interaction.options.getNumber("volume");
+  const volumeInput = isMessage ? messageInput : interaction.options.getNumber("volume");
   const guildId = isMessage ? message.guildId : interaction.guildId;
 
   if (!(volumeInput >= 0 && volumeInput <= 100)) {
-    sendReply(
-      interaction,
-      message,
-      isMessage,
-      "Invalid input. Enter a number out of 100"
-    );
+    sendReply(interaction, message, isMessage, "Invalid input. Enter a number out of 100");
     return;
   }
 

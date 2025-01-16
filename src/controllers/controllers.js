@@ -3,11 +3,7 @@ import services from "../services/services.js";
 const joinChannel = async (req, res, next) => {
   const { guildId, channelId } = req.body;
   if (!guildId || !channelId) {
-    res
-      .status(400)
-      .send(
-        "Missing 'Content-Type' header or 'guildId', 'channelId' parameters in body"
-      );
+    res.status(400).send("Missing 'Content-Type' header or 'guildId', 'channelId' parameters in body");
     return;
   }
   try {
@@ -21,11 +17,7 @@ const joinChannel = async (req, res, next) => {
 const leaveChannel = async (req, res, next) => {
   const { guildId } = req.body;
   if (!guildId) {
-    res
-      .status(400)
-      .send(
-        "Missing 'Content-Type' header or 'guildId' parameter in body"
-      );
+    res.status(400).send("Missing 'Content-Type' header or 'guildId' parameter in body");
     return;
   }
   try {
@@ -39,11 +31,7 @@ const leaveChannel = async (req, res, next) => {
 const changeVolume = async (req, res, next) => {
   const { guildId, volume } = req.body;
   if (!guildId || !volume) {
-    res
-      .status(400)
-      .send(
-        "Missing 'Content-Type' header or 'guildId', 'volume' parameters in body"
-      );
+    res.status(400).send("Missing 'Content-Type' header or 'guildId', 'volume' parameters in body");
     return;
   }
   try {
@@ -108,9 +96,7 @@ const getQueue = async (req, res, next) => {
 const pauseQueue = async (req, res, next) => {
   const { guildId } = req.body;
   if (!guildId) {
-    res
-      .status(400)
-      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    res.status(400).send("Missing 'Content-Type' header or 'guildId' parameter in body");
     return;
   }
   try {
@@ -124,9 +110,7 @@ const pauseQueue = async (req, res, next) => {
 const resumeQueue = async (req, res, next) => {
   const { guildId } = req.body;
   if (!guildId) {
-    res
-      .status(400)
-      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    res.status(400).send("Missing 'Content-Type' header or 'guildId' parameter in body");
     return;
   }
   try {
@@ -140,9 +124,7 @@ const resumeQueue = async (req, res, next) => {
 const clearQueue = async (req, res, next) => {
   const { guildId } = req.body;
   if (!guildId) {
-    res
-      .status(400)
-      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    res.status(400).send("Missing 'Content-Type' header or 'guildId' parameter in body");
     return;
   }
   try {
@@ -156,9 +138,7 @@ const clearQueue = async (req, res, next) => {
 const skipSong = async (req, res, next) => {
   const { guildId } = req.body;
   if (!guildId) {
-    res
-      .status(400)
-      .send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    res.status(400).send("Missing 'Content-Type' header or 'guildId' parameter in body");
     return;
   }
   try {
@@ -172,11 +152,7 @@ const skipSong = async (req, res, next) => {
 const addSong = async (req, res, next) => {
   const { guildId, track } = req.body;
   if (!guildId || !track) {
-    res
-      .status(400)
-      .send(
-        "Missing 'Content-Type' header or 'guildId', 'track' parameters in body"
-      );
+    res.status(400).send("Missing 'Content-Type' header or 'guildId', 'track' parameters in body");
     return;
   }
   try {
