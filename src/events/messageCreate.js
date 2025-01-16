@@ -17,8 +17,9 @@ const prefix = process.env.PREFIX;
 async function execute(message) {
   if (message.author.bot || !message.content.startsWith(prefix)) return;
 
-  const commandName = message.content.split(" ")[0].toLowerCase().substring(prefix.length);
-  const messageInput = message.content.split(" ").slice(1).join(" ");
+  const trimmedContent = message.content.substring(prefix.length).trimStart();
+  const commandName = trimmedContent.split(" ")[0].toLowerCase();
+  const messageInput = trimmedContent.split(" ").slice(1).join(" ");
 
   switch (commandName) {
     case "q":
@@ -91,7 +92,7 @@ async function execute(message) {
 
     default:
       message.channel.send(
-        "Unknown command. You probably forgot the space between the command and the search term. Or you added a space. Or you typo'd. Yeah you'd do that wouldn't you..",
+        "Unknown command. You probably forgot the space between the command and the search term. Or you typo'd. Or both. Yeah you'd do that wouldn't you..",
       );
       logger.warn("Unknown command, or one people organically want to use: " + commandName);
 

@@ -75,8 +75,8 @@ const getVoice = async (guildId) => {
 const getQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   const rawQueue = await player.getQueue();
-  if (rawQueue.length == 0) {
-    return "Queue is empty";
+  if (rawQueue.length === 0) {
+    return rawQueue;
   }
   const queue = await player.decodeTracks(rawQueue);
   return queue;
@@ -103,7 +103,7 @@ const autoLeave = async (guildId) => {
     try {
       const queue = await getQueue(guildId);
 
-      if (typeof queue !== "object") {
+      if (queue.length === 0) {
         if (!timeoutId) {
           timeoutId = setTimeout(async () => {
             clearTimers();
@@ -225,7 +225,7 @@ async function nowPlaying(guildId) {
     const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
     const row = new ActionRowBuilder().addComponents(queueButton, hjelpButton);
 
-    if (typeof queue !== "object") {
+    if (queue.length === 0) {
       client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
       autoLeave(guildId);
       return;
