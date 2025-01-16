@@ -28,7 +28,7 @@ process.on("warning", (error) => {
 
 client.login(process.env.DISCORD_TOKEN);
 
-var isFirstStartEvent = true;
+let isFirstStartEvent = true;
 
 function toggleFirstStartTrue() {
   isFirstStartEvent = true;
