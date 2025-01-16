@@ -1,7 +1,7 @@
 import FastLink from "@performanc/fastlink";
 import { EmbedBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
-import { getVoice, getQueue } from "../services/services.js";
+import { getVoice, getQueue, autoLeave } from "../services/services.js";
 import { client } from "../musicbot.js";
 
 const name = "raw";
@@ -56,6 +56,7 @@ async function nowPlaying(data) {
 
     if (typeof queue !== "object") {
       client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
+      autoLeave(data.guildId);
       return;
     }
 
@@ -81,7 +82,7 @@ async function nowPlaying(data) {
       )
       .setThumbnail(artworkUrl)
       .setImage(
-        "https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/qolThings/invis.png"
+        "https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png"
       );
 
     channel.send({ embeds: [nowPlaying] });
