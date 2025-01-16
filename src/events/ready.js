@@ -1,7 +1,6 @@
 import { readdirSync } from "fs";
 import { REST, Routes } from "discord.js";
 import { logger } from "../utils/logger.js";
-import { client } from "../musicbot.js";
 
 const name = "ready";
 const runOnce = true;

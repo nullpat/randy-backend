@@ -1,6 +1,9 @@
 import FastLink from "@performanc/fastlink";
-import { client } from "../musicbot.js";
 import errsole from "errsole";
+import { client } from "../musicbot.js";
+import { toggleFirstStartTrue } from "../../index.js";
+import { logger } from "../utils/logger.js";
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 
 const joinChannel = async (guildId, channelId) => {
   const player = new FastLink.player.Player(guildId);
@@ -23,6 +26,8 @@ const leaveChannel = async (guildId) => {
     client.guilds.cache.get(guildId).shard.send(payload);
   });
   player.destroy();
+  toggleFirstStartTrue();
+  client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
   return "Disconnected.";
 };
 
@@ -70,8 +75,8 @@ const getVoice = async (guildId) => {
 const getQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   const rawQueue = await player.getQueue();
-  if (rawQueue.length == 0) {
-    return "Queue is empty";
+  if (rawQueue.length === 0) {
+    return rawQueue;
   }
   const queue = await player.decodeTracks(rawQueue);
   return queue;
@@ -98,10 +103,11 @@ const autoLeave = async (guildId) => {
     try {
       const queue = await getQueue(guildId);
 
-      if (typeof queue !== "object") {
+      if (queue.length === 0) {
         if (!timeoutId) {
           timeoutId = setTimeout(async () => {
             clearTimers();
+            toggleFirstStartTrue();
             await leaveChannel(guildId);
           }, timeoutValue);
         }
@@ -134,6 +140,7 @@ const resumeQueue = async (guildId) => {
 const clearQueue = async (guildId) => {
   const player = await getPlayer(guildId);
   player.update({ track: { encoded: null } });
+  toggleFirstStartTrue();
   return "Cleared the queue.";
 };
 
@@ -159,25 +166,100 @@ const addSong = async (guildId, track, youtube) => {
       player.update({
         tracks: { encodeds: data.tracks.map(({ encoded }) => encoded) },
       });
-      return `Added ${data.tracks.length} songs from ${data.tracks[0].info.sourceName[0].toUpperCase()}${data.tracks[0].info.sourceName.slice(1)}.`;
+      const formattedPlaylistSource = formatSource(data.tracks[0].info.sourceName);
+      return `Added ${data.tracks.length} songs from ${formattedPlaylistSource}.`;
 
     case "track":
     case "short":
       player.update({
         track: { encoded: data.encoded },
       });
-      return `Added ${data.info.title} from ${data.info.sourceName[0].toUpperCase()}${data.info.sourceName.slice(1)}.`;
+      const formattedTrackSource = formatSource(data.info.sourceName);
+      return `Added ${data.info.title} from ${formattedTrackSource}.`;
 
     case "search":
       player.update({
         track: { encoded: data[0].encoded },
       });
-      return `Added ${data[0].info.title} from ${data[0].info.sourceName[0].toUpperCase()}${data[0].info.sourceName.slice(1)} search.`;
+      const formattedSearchSource = formatSource(data[0].info.sourceName);
+      return `Added ${data[0].info.title} from ${formattedSearchSource} search.`;
 
     default:
       throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
   }
 };
+
+const formatSource = (sourceName) => {
+  switch (sourceName) {
+    case "youtube":
+      return "YouTube";
+    case "soundcloud":
+      return "SoundCloud";
+    case "deezer":
+      return "Deezer";
+    case "spotify":
+      return "Spotify";
+    default:
+      return sourceName;
+  }
+};
+
+async function nowPlaying(guildId) {
+  const overrideChannels = [
+    {
+      guildId: "889971568732684298",
+      channelId: "1139615420400291851",
+    },
+    {
+      guildId: "166740556947390465",
+      channelId: "708165175341088828",
+    },
+  ];
+  try {
+    const voiceData = await getVoice(guildId);
+    const queue = await getQueue(guildId);
+    const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
+    const selectedChannelId = matchedOverride ? matchedOverride.channelId : voiceData.channelId;
+    const channel = client.channels.cache.get(selectedChannelId);
+    const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
+    const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
+    const row = new ActionRowBuilder().addComponents(queueButton, hjelpButton);
+
+    if (queue.length === 0) {
+      client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
+      autoLeave(guildId);
+      return;
+    }
+
+    if (!channel || !channel.isTextBased()) {
+      logger.error(`Channel Id must exist and allow text: ${voiceData.channelId}`);
+      return;
+    }
+
+    const { title, author, uri, artworkUrl } = queue[0].info;
+    const albumName = queue[0].pluginInfo.albumName || "";
+
+    const nowPlaying = new EmbedBuilder()
+      .setTitle(title)
+      .setURL(uri)
+      .setAuthor({
+        name: "Now Playing",
+      })
+      .setDescription(
+        `${author}
+        ${albumName}`,
+      )
+      .setThumbnail(artworkUrl)
+      .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
+
+    channel.send({ embeds: [nowPlaying], components: [row] });
+    client.user.setPresence({
+      activities: [{ name: `${title} - ${author}`, type: 2 }],
+    });
+  } catch (error) {
+    logger.error(error.stack);
+  }
+}
 
 const services = {
   joinChannel,
@@ -194,6 +276,8 @@ const services = {
   clearQueue,
   skipSong,
   addSong,
+  formatSource,
+  nowPlaying,
 };
 
 export {
@@ -211,6 +295,8 @@ export {
   clearQueue,
   skipSong,
   addSong,
+  formatSource,
+  nowPlaying,
 };
 
 export default services;

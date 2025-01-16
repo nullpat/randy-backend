@@ -3,10 +3,10 @@ import { logger } from "../utils/logger.js";
 import { sendReply } from "../helpers/helpers.js";
 import { getQueue } from "../services/services.js";
 
-const data = new SlashCommandBuilder().setName("queue").setDescription("Replies with the song queue");
+const data = new SlashCommandBuilder().setName("queue").setDescription("Displays songs in queue");
 
-async function execute(interaction, message, isMessage) {
-  const guildId = isMessage ? message.guildId : interaction.guildId;
+async function execute(interaction, message) {
+  const guildId = message ? message.guildId : interaction.guildId;
 
   try {
     const queue = await getQueue(guildId);
@@ -15,10 +15,12 @@ async function execute(interaction, message, isMessage) {
       author: song.info.author,
       album: song.pluginInfo?.albumName,
     }));
-    sendReply(interaction, message, isMessage, `\`\`\`json\n${JSON.stringify(prettyQueue, null, 2)}\n\`\`\``);
+    const prettierQueue = JSON.stringify(prettyQueue, null, 2);
+    const formattedQueue = `\`\`\`json\n${prettierQueue}\n\`\`\``;
+    sendReply(interaction, message, formattedQueue);
   } catch (error) {
     logger.error(error.stack);
-    sendReply(interaction, message, isMessage, error.message);
+    sendReply(interaction, message, error.message);
   }
 }
 

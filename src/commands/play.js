@@ -1,20 +1,21 @@
 import { SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { sendReply } from "../helpers/helpers.js";
-import { addSong, joinChannel } from "../services/services.js";
+import { addSong, joinChannel, nowPlaying } from "../services/services.js";
+import { isFirstStartEvent, toggleFirstStartFalse } from "../../index.js";
 
 const data = new SlashCommandBuilder()
   .setName("play")
-  .setDescription("Adds a song to the queue, via URL or search")
+  .setDescription("Adds a song to the queue, via URL or search (Shortcut is >> not >p because of pause command)")
   .addStringOption((option) => option.setName("song").setDescription("Enter song URL or search").setRequired(true));
 
-async function execute(interaction, message, isMessage, messageInput, isYT) {
-  const songInput = isMessage ? messageInput : interaction.options.getString("song");
-  const guildId = isMessage ? message.guildId : interaction.guildId;
-  const channelId = isMessage ? message.member.voice.channel?.id : interaction.member.voice.channel?.id;
+async function execute(interaction, message, messageInput, isYT) {
+  const songInput = message ? messageInput : interaction.options.getString("song");
+  const guildId = message ? message.guildId : interaction.guildId;
+  const channelId = message ? message.member.voice.channel?.id : interaction.member.voice.channel?.id;
 
   if (!channelId) {
-    sendReply(interaction, message, isMessage, "You are not in a voice channel.");
+    sendReply(interaction, message, "You are not in a voice channel.");
     return;
   }
 
@@ -23,10 +24,15 @@ async function execute(interaction, message, isMessage, messageInput, isYT) {
   try {
     const join = await joinChannel(guildId, channelId);
     const play = await addSong(guildId, songInput, isYT);
-    sendReply(interaction, message, isMessage, play);
+    sendReply(interaction, message, play);
+
+    if (isFirstStartEvent) {
+      toggleFirstStartFalse();
+      nowPlaying(guildId);
+    }
   } catch (error) {
     logger.error(error.stack);
-    sendReply(interaction, message, isMessage, error.message);
+    sendReply(interaction, message, error.message);
   }
 }
 

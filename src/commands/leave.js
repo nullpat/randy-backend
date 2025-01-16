@@ -5,17 +5,17 @@ import { leaveChannel } from "../services/services.js";
 
 const data = new SlashCommandBuilder()
   .setName("leave")
-  .setDescription("Leaves the current voice channel and ends song playback");
+  .setDescription("Leaves the current voice channel and ends playback");
 
-async function execute(interaction, message, isMessage) {
-  const guildId = isMessage ? message.guildId : interaction.guildId;
+async function execute(interaction, message) {
+  const guildId = message ? message.guildId : interaction.guildId;
 
   try {
     const leave = await leaveChannel(guildId);
-    sendReply(interaction, message, isMessage, leave);
+    sendReply(interaction, message, leave);
   } catch (error) {
     logger.error(error.stack);
-    sendReply(interaction, message, isMessage, error.message);
+    sendReply(interaction, message, error.message);
   }
 }
 
