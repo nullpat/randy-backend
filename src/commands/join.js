@@ -3,23 +3,14 @@ import { logger } from "../utils/logger.js";
 import { sendReply } from "../helpers/helpers.js";
 import { joinChannel } from "../services/services.js";
 
-const data = new SlashCommandBuilder()
-  .setName("join")
-  .setDescription("Joins your voice channel");
+const data = new SlashCommandBuilder().setName("join").setDescription("Joins your voice channel");
 
 async function execute(interaction, message, isMessage) {
   const guildId = isMessage ? message.guildId : interaction.guildId;
-  const channelId = isMessage
-    ? message.member.voice.channel.id
-    : interaction.member.voice.channel.id;
+  const channelId = isMessage ? message.member.voice.channel.id : interaction.member.voice.channel.id;
 
   if (!channelId) {
-    sendReply(
-      interaction,
-      message,
-      isMessage,
-      "You are not in a voice channel."
-    );
+    sendReply(interaction, message, isMessage, "You are not in a voice channel.");
     return;
   }
 

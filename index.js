@@ -36,7 +36,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: frontendUrl,
-  })
+  }),
 );
 app.use("/api", router);
 app.use(errorHandler);

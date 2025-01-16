@@ -3,9 +3,7 @@ import { logger } from "../utils/logger.js";
 import { sendReply } from "../helpers/helpers.js";
 import { getQueue } from "../services/services.js";
 
-const data = new SlashCommandBuilder()
-  .setName("queue")
-  .setDescription("Replies with the song queue");
+const data = new SlashCommandBuilder().setName("queue").setDescription("Replies with the song queue");
 
 async function execute(interaction, message, isMessage) {
   const guildId = isMessage ? message.guildId : interaction.guildId;
@@ -17,12 +15,7 @@ async function execute(interaction, message, isMessage) {
       author: song.info.author,
       album: song.pluginInfo?.albumName,
     }));
-    sendReply(
-      interaction,
-      message,
-      isMessage,
-      `\`\`\`json\n${JSON.stringify(prettyQueue, null, 2)}\n\`\`\``
-    );
+    sendReply(interaction, message, isMessage, `\`\`\`json\n${JSON.stringify(prettyQueue, null, 2)}\n\`\`\``);
   } catch (error) {
     logger.error(error.stack);
     sendReply(interaction, message, isMessage, error.message);

@@ -16,10 +16,7 @@ const prefix = process.env.PREFIX;
 async function execute(message) {
   if (message.author.bot || !message.content.startsWith(prefix)) return;
 
-  const commandName = message.content
-    .split(" ")[0]
-    .toLowerCase()
-    .substring(prefix.length);
+  const commandName = message.content.split(" ")[0].toLowerCase().substring(prefix.length);
   const messageInput = message.content.split(" ").slice(1).join(" ");
 
   switch (commandName) {
@@ -86,9 +83,11 @@ async function execute(message) {
       break;
 
     default:
-      message.channel.send("Unknown command. You almost certainly forgot the space between the command and the search term. Or you typo'd. Or both.");
+      message.channel.send(
+        "Unknown command. You almost certainly forgot the space between the command and the search term. Or you typo'd. Or both.",
+      );
       logger.warn("Unknown command, or one people organically want to use: " + commandName);
-      
+
       break;
   }
 }

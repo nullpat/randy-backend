@@ -13,8 +13,7 @@ const joinChannel = async (guildId, channelId) => {
 
 const getPlayer = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
-  if (!player.playerCreated())
-    throw new Error("Player does not exist in server.");
+  if (!player.playerCreated()) throw new Error("Player does not exist in server.");
   return player;
 };
 
@@ -110,7 +109,7 @@ const autoLeave = async (guildId) => {
         clearTimers();
       }
     } catch (error) {
-      errsole.warn(error.stack)
+      errsole.warn(error.stack);
       clearTimers();
     }
   }
@@ -146,11 +145,7 @@ const skipSong = async (guildId) => {
 
 const addSong = async (guildId, track, youtube) => {
   const player = await getPlayer(guildId);
-  const loadPrefix = track.startsWith("https://")
-    ? ""
-    : youtube
-    ? "ytsearch:"
-    : "dzsearch:";
+  const loadPrefix = track.startsWith("https://") ? "" : youtube ? "ytsearch:" : "dzsearch:";
   const load = await player.loadTrack(loadPrefix + track);
   const { loadType, data } = load;
 
