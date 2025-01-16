@@ -22,52 +22,52 @@ async function execute(message) {
   switch (commandName) {
     case "q":
     case "queue":
-      queueCommand(null, message, true);
+      queueCommand(null, message);
       break;
 
     case "m":
     case "j":
     case "move":
     case "join":
-      joinCommand(null, message, true);
+      joinCommand(null, message);
       break;
 
     case ">":
     case "play":
-      playCommand(null, message, true, messageInput, false);
+      playCommand(null, message, messageInput, false);
       break;
 
     case "y":
     case "yt":
     case "youtube":
-      playCommand(null, message, true, messageInput, true);
+      playCommand(null, message, messageInput, true);
       break;
 
     case "p":
     case "pause":
-      pauseCommand(null, message, true);
+      pauseCommand(null, message);
       break;
 
     case "r":
     case "resume":
-      resumeCommand(null, message, true);
+      resumeCommand(null, message);
       break;
 
     case "c":
     case "clear":
-      clearCommand(null, message, true);
+      clearCommand(null, message);
       break;
 
     case "n":
     case "s":
     case "next":
     case "skip":
-      skipCommand(null, message, true);
+      skipCommand(null, message);
       break;
 
     case "v":
     case "volume":
-      volumeCommand(null, message, true, messageInput);
+      volumeCommand(null, message, messageInput);
       break;
 
     case "d":
@@ -79,7 +79,7 @@ async function execute(message) {
     case "exit":
     case "end":
     case "leave":
-      leaveCommand(null, message, true);
+      leaveCommand(null, message);
       break;
 
     default:

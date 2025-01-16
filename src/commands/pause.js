@@ -5,15 +5,15 @@ import { pauseQueue } from "../services/services.js";
 
 const data = new SlashCommandBuilder().setName("pause").setDescription("Pauses song playback");
 
-async function execute(interaction, message, isMessage) {
-  const guildId = isMessage ? message.guildId : interaction.guildId;
+async function execute(interaction, message) {
+  const guildId = message ? message.guildId : interaction.guildId;
 
   try {
     const pause = await pauseQueue(guildId);
-    sendReply(interaction, message, isMessage, pause);
+    sendReply(interaction, message, pause);
   } catch (error) {
     logger.error(error.stack);
-    sendReply(interaction, message, isMessage, error.message);
+    sendReply(interaction, message, error.message);
   }
 }
 

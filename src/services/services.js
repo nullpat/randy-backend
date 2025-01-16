@@ -159,23 +159,41 @@ const addSong = async (guildId, track, youtube) => {
       player.update({
         tracks: { encodeds: data.tracks.map(({ encoded }) => encoded) },
       });
-      return `Added ${data.tracks.length} songs from ${data.tracks[0].info.sourceName[0].toUpperCase()}${data.tracks[0].info.sourceName.slice(1)}.`;
+      const formattedPlaylistSource = formatSource(data.tracks[0].info.sourceName)
+      return `Added ${data.tracks.length} songs from ${formattedPlaylistSource}.`;
 
     case "track":
     case "short":
       player.update({
         track: { encoded: data.encoded },
       });
-      return `Added ${data.info.title} from ${data.info.sourceName[0].toUpperCase()}${data.info.sourceName.slice(1)}.`;
+      const formattedTrackSource = formatSource(data.info.sourceName)
+      return `Added ${data.info.title} from ${formattedTrackSource}.`;
 
     case "search":
       player.update({
         track: { encoded: data[0].encoded },
       });
-      return `Added ${data[0].info.title} from ${data[0].info.sourceName[0].toUpperCase()}${data[0].info.sourceName.slice(1)} search.`;
+      const formattedSearchSource = formatSource(data[0].info.sourceName);
+      return `Added ${data[0].info.title} from ${formattedSearchSource} search.`;
 
     default:
       throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
+  }
+};
+
+const formatSource = (sourceName) => {
+  switch (sourceName) {
+    case "youtube":
+      return "YouTube";
+    case "soundcloud":
+      return "SoundCloud";
+    case "deezer":
+      return "Deezer";
+    case "spotify":
+      return "Spotify";
+    default:
+      return sourceName;
   }
 };
 
@@ -194,6 +212,7 @@ const services = {
   clearQueue,
   skipSong,
   addSong,
+  formatSource,
 };
 
 export {
@@ -211,6 +230,7 @@ export {
   clearQueue,
   skipSong,
   addSong,
+  formatSource,
 };
 
 export default services;
