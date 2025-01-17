@@ -3,6 +3,7 @@ import controllers from "../controllers/controllers.js";
 
 const router = express.Router();
 
+router.get("/commands", controllers.getCommands);
 router.get("/servers", controllers.getServers);
 router.get("/server", controllers.getServer);
 router.get("/voice", controllers.getVoice);

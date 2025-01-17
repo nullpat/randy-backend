@@ -163,6 +163,15 @@ const addSong = async (req, res, next) => {
   }
 };
 
+const getCommands = async (req, res, next) => {
+  try {
+    const commands = await services.getCommands();
+    res.status(200).send(commands);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const controllers = {
   joinChannel,
   leaveChannel,
@@ -176,6 +185,7 @@ const controllers = {
   clearQueue,
   skipSong,
   addSong,
+  getCommands,
 };
 
 export default controllers;

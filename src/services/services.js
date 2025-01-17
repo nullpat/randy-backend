@@ -59,11 +59,39 @@ const getServer = async (guildId) => {
   const serverInfo = servers
     .filter((server) => server.id === guildId)
     .map((server) => ({
+      id: server.id,
       name: server.name,
       queue: decodedQueue,
+      icon: server.icon,
     }));
+
   const singleServerInfo = serverInfo[0];
-  return singleServerInfo;
+  const iconURL = singleServerInfo.icon
+    ? `https://cdn.discordapp.com/icons/${singleServerInfo.id}/${singleServerInfo.icon}.png`
+    : null;
+
+  const shortName = singleServerInfo.name
+    .match(/\b\w|\W+/g)
+    .map((name) => {
+      if (/\w/.test(name)) {
+        return name.charAt(0).toUpperCase();
+      }
+      if (name.trim() === "") {
+        return "";
+      }
+      return name;
+    })
+    .join("")
+    .replace("'S", "");
+
+  const finalServerInfo = serverInfo.map((server) => ({
+    name: server.name,
+    queue: decodedQueue,
+    icon: iconURL,
+    shortName: shortName,
+  }));
+
+  return finalServerInfo;
 };
 
 const getVoice = async (guildId) => {
@@ -261,6 +289,15 @@ async function nowPlaying(guildId) {
   }
 }
 
+const getCommands = () => {
+  const commands = client.commands;
+  const prettyCommands = commands.map((command) => ({
+    command: command.data.name,
+    description: command.data.description,
+  }));
+  return prettyCommands;
+};
+
 const services = {
   joinChannel,
   getPlayer,
@@ -278,6 +315,7 @@ const services = {
   addSong,
   formatSource,
   nowPlaying,
+  getCommands,
 };
 
 export {
@@ -297,6 +335,7 @@ export {
   addSong,
   formatSource,
   nowPlaying,
+  getCommands,
 };
 
 export default services;
