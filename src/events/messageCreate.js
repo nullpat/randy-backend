@@ -8,6 +8,7 @@ import { execute as skipCommand } from "../commands/skip.js";
 import { execute as volumeCommand } from "../commands/volume.js";
 import { execute as leaveCommand } from "../commands/leave.js";
 import { execute as hjelpCommand } from "../commands/hjelp.js";
+import { execute as undoCommand } from "../commands/undo.js";
 import { logger } from "../utils/logger.js";
 
 const name = "messageCreate";
@@ -76,6 +77,11 @@ async function execute(message) {
     case "help":
     case "hjelp":
       hjelpCommand(null, message, messageInput);
+      break;
+
+    case "u":
+    case "undo":
+      undoCommand(null, message);
       break;
 
     case "d":

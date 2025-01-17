@@ -135,6 +135,20 @@ const clearQueue = async (req, res, next) => {
   }
 };
 
+const removeLast = async (req, res, next) => {
+  const { guildId } = req.body;
+  if (!guildId) {
+    res.status(400).send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    return;
+  }
+  try {
+    const remove = await services.removeLast(guildId);
+    res.status(200).send(remove);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const skipSong = async (req, res, next) => {
   const { guildId } = req.body;
   if (!guildId) {
@@ -163,6 +177,15 @@ const addSong = async (req, res, next) => {
   }
 };
 
+const getCommands = async (req, res, next) => {
+  try {
+    const commands = await services.getCommands();
+    res.status(200).send(commands);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const controllers = {
   joinChannel,
   leaveChannel,
@@ -176,6 +199,8 @@ const controllers = {
   clearQueue,
   skipSong,
   addSong,
+  getCommands,
+  removeLast,
 };
 
 export default controllers;

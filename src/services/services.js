@@ -59,11 +59,39 @@ const getServer = async (guildId) => {
   const serverInfo = servers
     .filter((server) => server.id === guildId)
     .map((server) => ({
+      id: server.id,
       name: server.name,
       queue: decodedQueue,
+      icon: server.icon,
     }));
+
   const singleServerInfo = serverInfo[0];
-  return singleServerInfo;
+  const iconURL = singleServerInfo.icon
+    ? `https://cdn.discordapp.com/icons/${singleServerInfo.id}/${singleServerInfo.icon}.png`
+    : null;
+
+  const shortName = singleServerInfo.name
+    .match(/\b\w|\W+/g)
+    .map((name) => {
+      if (/\w/.test(name)) {
+        return name.charAt(0).toUpperCase();
+      }
+      if (name.trim() === "") {
+        return "";
+      }
+      return name;
+    })
+    .join("")
+    .replace("'S", "");
+
+  const finalServerInfo = serverInfo.map((server) => ({
+    name: server.name,
+    queue: decodedQueue,
+    icon: iconURL,
+    shortName: shortName,
+  }));
+
+  return finalServerInfo;
 };
 
 const getVoice = async (guildId) => {
@@ -142,6 +170,18 @@ const clearQueue = async (guildId) => {
   player.update({ track: { encoded: null } });
   toggleFirstStartTrue();
   return "Cleared the queue.";
+};
+
+const removeLast = async (guildId) => {
+  const player = await getPlayer(guildId);
+  const removedTrack = player.info.queue.slice(-1)
+  const decodedTrack = await player.decodeTracks(removedTrack)
+  if (player.info.queue.length === 1) {
+    clearQueue(guildId);
+  } else {
+    player.info.queue = player.info.queue.slice(0, -1);
+  }
+  return `Removed ${decodedTrack[0].info.title} from the bottom of the queue.`;
 };
 
 const skipSong = async (guildId) => {
@@ -261,6 +301,15 @@ async function nowPlaying(guildId) {
   }
 }
 
+const getCommands = () => {
+  const commands = client.commands;
+  const prettyCommands = commands.map((command) => ({
+    command: command.data.name,
+    description: command.data.description,
+  }));
+  return prettyCommands;
+};
+
 const services = {
   joinChannel,
   getPlayer,
@@ -278,6 +327,8 @@ const services = {
   addSong,
   formatSource,
   nowPlaying,
+  getCommands,
+  removeLast,
 };
 
 export {
@@ -297,6 +348,8 @@ export {
   addSong,
   formatSource,
   nowPlaying,
+  getCommands,
+  removeLast,
 };
 
 export default services;
