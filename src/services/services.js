@@ -172,6 +172,18 @@ const clearQueue = async (guildId) => {
   return "Cleared the queue.";
 };
 
+const removeLast = async (guildId) => {
+  const player = await getPlayer(guildId);
+  const removedTrack = player.info.queue.slice(-1)
+  const decodedTrack = await player.decodeTracks(removedTrack)
+  if (player.info.queue.length === 1) {
+    clearQueue(guildId);
+  } else {
+    player.info.queue = player.info.queue.slice(0, -1);
+  }
+  return `Removed ${decodedTrack[0].info.title} from the bottom of the queue.`;
+};
+
 const skipSong = async (guildId) => {
   const player = await getPlayer(guildId);
   const skip = player.skipTrack();
@@ -316,6 +328,7 @@ const services = {
   formatSource,
   nowPlaying,
   getCommands,
+  removeLast,
 };
 
 export {
@@ -336,6 +349,7 @@ export {
   formatSource,
   nowPlaying,
   getCommands,
+  removeLast,
 };
 
 export default services;

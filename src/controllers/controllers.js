@@ -135,6 +135,20 @@ const clearQueue = async (req, res, next) => {
   }
 };
 
+const removeLast = async (req, res, next) => {
+  const { guildId } = req.body;
+  if (!guildId) {
+    res.status(400).send("Missing 'Content-Type' header or 'guildId' parameter in body");
+    return;
+  }
+  try {
+    const remove = await services.removeLast(guildId);
+    res.status(200).send(remove);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const skipSong = async (req, res, next) => {
   const { guildId } = req.body;
   if (!guildId) {
@@ -186,6 +200,7 @@ const controllers = {
   skipSong,
   addSong,
   getCommands,
+  removeLast,
 };
 
 export default controllers;

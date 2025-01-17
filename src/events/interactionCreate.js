@@ -49,6 +49,15 @@ async function execute(interaction) {
         }
         break;
 
+        case "undo":
+          try {
+            const undoCommand = interaction.client.commands.get("undo");
+            await undoCommand.execute(interaction);
+          } catch (error) {
+            logger.error(error.stack);
+          }
+          break;
+
       default:
         break;
     }
