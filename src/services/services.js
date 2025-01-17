@@ -65,12 +65,11 @@ const getServer = async (guildId) => {
       icon: server.icon,
     }));
 
-  const singleServerInfo = serverInfo[0];
-  const iconURL = singleServerInfo.icon
-    ? `https://cdn.discordapp.com/icons/${singleServerInfo.id}/${singleServerInfo.icon}.png`
+  const iconURL = serverInfo[0].icon
+    ? `https://cdn.discordapp.com/icons/${serverInfo[0].id}/${serverInfo[0].icon}.png`
     : null;
 
-  const shortName = singleServerInfo.name
+  const shortName = serverInfo[0].name
     .match(/\b\w|\W+/g)
     .map((name) => {
       if (/\w/.test(name)) {
@@ -90,8 +89,8 @@ const getServer = async (guildId) => {
     icon: iconURL,
     shortName: shortName,
   }));
-
-  return finalServerInfo;
+  const singleServerInfo = finalServerInfo[0];
+  return singleServerInfo;
 };
 
 const getVoice = async (guildId) => {
