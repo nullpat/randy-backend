@@ -29,8 +29,8 @@ async function execute(interaction, message, messageInput, isYT) {
     sendMessage(interaction, message, play, row);
 
     if (isFirstStartEvent) {
+      nowPlaying(guildId, isFirstStartEvent);
       toggleFirstStartFalse();
-      nowPlaying(guildId);
     }
   } catch (error) {
     logger.error(error.stack);

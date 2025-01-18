@@ -1,7 +1,7 @@
 import FastLink from "@performanc/fastlink";
 import errsole from "errsole";
 import { client } from "../musicbot.js";
-import { isFirstStartEvent, toggleFirstStartTrue } from "../../index.js";
+import { toggleFirstStartTrue } from "../../index.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 
@@ -176,7 +176,7 @@ const checkLast = async (guildId) => {
   const player = await getPlayer(guildId);
   const removedTrack = player.info.queue.slice(-1);
   if (removedTrack.length === 0) {
-    return
+    return;
   }
   const decodedTrack = await player.decodeTracks(removedTrack);
 
@@ -255,7 +255,7 @@ const formatSource = (sourceName) => {
   }
 };
 
-async function nowPlaying(guildId) {
+const nowPlaying = async (guildId, isFirstStartEvent) => {
   const overrideChannels = [
     {
       guildId: "889971568732684298",
@@ -274,10 +274,10 @@ async function nowPlaying(guildId) {
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
     const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
-    const undoButton = isFirstStartEvent
-      ? null
-      : new ButtonBuilder().setCustomId("undo").setLabel("Undo").setStyle(ButtonStyle.Secondary);
-    const row = new ActionRowBuilder().addComponents(undoButton, queueButton, hjelpButton);
+    const undoButton = new ButtonBuilder().setCustomId("undo").setLabel("Undo").setStyle(ButtonStyle.Secondary);
+    const undoRow = new ActionRowBuilder().addComponents(undoButton, queueButton, hjelpButton);
+    const normalRow = new ActionRowBuilder().addComponents(queueButton, hjelpButton);
+    const row = isFirstStartEvent ? undoRow : normalRow;
 
     if (queue.length === 0) {
       client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
@@ -313,7 +313,7 @@ async function nowPlaying(guildId) {
   } catch (error) {
     logger.error(error.stack);
   }
-}
+};
 
 const getCommands = () => {
   const commands = client.commands;
