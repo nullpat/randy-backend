@@ -1,7 +1,7 @@
 import FastLink from "@performanc/fastlink";
 import errsole from "errsole";
 import { client } from "../musicbot.js";
-import { toggleFirstStartTrue } from "../../index.js";
+import { isFirstStartEvent, toggleFirstStartTrue } from "../../index.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 
@@ -172,16 +172,27 @@ const clearQueue = async (guildId) => {
   return "Cleared the queue.";
 };
 
+const checkLast = async (guildId) => {
+  const player = await getPlayer(guildId);
+  const removedTrack = player.info.queue.slice(-1);
+  if (removedTrack.length === 0) {
+    return
+  }
+  const decodedTrack = await player.decodeTracks(removedTrack);
+
+  return `Are you sure you want to remove ${decodedTrack[0].info.title} by ${decodedTrack[0].info.author} from the queue?`;
+};
+
 const removeLast = async (guildId) => {
   const player = await getPlayer(guildId);
-  const removedTrack = player.info.queue.slice(-1)
-  const decodedTrack = await player.decodeTracks(removedTrack)
+  const removedTrack = player.info.queue.slice(-1);
+  const decodedTrack = await player.decodeTracks(removedTrack);
   if (player.info.queue.length === 1) {
     clearQueue(guildId);
   } else {
     player.info.queue = player.info.queue.slice(0, -1);
   }
-  return `Removed ${decodedTrack[0].info.title} from the bottom of the queue.`;
+  return `Removed ${decodedTrack[0].info.title} by ${decodedTrack[0].info.author} from the queue.`;
 };
 
 const skipSong = async (guildId) => {
@@ -263,7 +274,10 @@ async function nowPlaying(guildId) {
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
     const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
-    const row = new ActionRowBuilder().addComponents(queueButton, hjelpButton);
+    const undoButton = isFirstStartEvent
+      ? null
+      : new ButtonBuilder().setCustomId("undo").setLabel("Undo").setStyle(ButtonStyle.Secondary);
+    const row = new ActionRowBuilder().addComponents(undoButton, queueButton, hjelpButton);
 
     if (queue.length === 0) {
       client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
@@ -328,6 +342,7 @@ const services = {
   formatSource,
   nowPlaying,
   getCommands,
+  checkLast,
   removeLast,
 };
 
@@ -349,6 +364,7 @@ export {
   formatSource,
   nowPlaying,
   getCommands,
+  checkLast,
   removeLast,
 };
 
