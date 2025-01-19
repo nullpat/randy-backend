@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
-import { sendMessage } from "../helpers/helpers.js";
+import { sendMessage, editMessage } from "../helpers/helpers.js";
 import { addSong, joinChannel, nowPlaying } from "../services/services.js";
 import { isFirstStartEvent, toggleFirstStartFalse } from "../../index.js";
 
@@ -24,14 +24,18 @@ async function execute(interaction, message, messageInput, isYT) {
   isYT = isYT ?? interaction.commandName === "youtube";
 
   try {
-    const join = await joinChannel(guildId, channelId);
+    await joinChannel(guildId, channelId);
     const play = await addSong(guildId, songInput, isYT);
-    sendMessage(interaction, message, play, row);
+    const response = await sendMessage(interaction, message, play, row);
 
     if (isFirstStartEvent) {
       nowPlaying(guildId, isFirstStartEvent);
       toggleFirstStartFalse();
     }
+
+    setTimeout(() => {
+      editMessage(interaction, response, play, null, "");
+    }, 10000);
   } catch (error) {
     logger.error(error.stack);
     sendMessage(interaction, message, error.message);

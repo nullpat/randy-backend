@@ -4,6 +4,7 @@ import { client } from "../musicbot.js";
 import { toggleFirstStartTrue } from "../../index.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
+import { editMessage } from "../helpers/helpers.js";
 
 const joinChannel = async (guildId, channelId) => {
   const player = new FastLink.player.Player(guildId);
@@ -306,10 +307,15 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
       .setThumbnail(artworkUrl)
       .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
 
-    channel.send({ embeds: [nowPlaying], components: [row] });
+    const response = await channel.send({ embeds: [nowPlaying], components: [row] });
     client.user.setPresence({
       activities: [{ name: `${title} - ${author}`, type: 2 }],
     });
+    if (isFirstStartEvent) {
+      setTimeout(() => {
+        editMessage(null, response, null, null, normalRow);
+      }, 10000);
+    }
   } catch (error) {
     logger.error(error.stack);
   }
