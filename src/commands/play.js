@@ -35,7 +35,7 @@ async function execute(interaction, message, messageInput, isYT) {
 
     setTimeout(() => {
       editMessage(interaction, response, play, null, "");
-    }, 10000);
+    }, 5000);
   } catch (error) {
     logger.error(error.stack);
     sendMessage(interaction, message, error.message);

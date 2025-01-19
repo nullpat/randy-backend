@@ -314,7 +314,7 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
     if (isFirstStartEvent) {
       setTimeout(() => {
         editMessage(null, response, null, null, normalRow);
-      }, 10000);
+      }, 5000);
     }
   } catch (error) {
     logger.error(error.stack);
