@@ -17,7 +17,7 @@ const joinChannel = async (guildId, channelId) => {
 
 const getPlayer = async (guildId) => {
   const player = new FastLink.player.Player(guildId);
-  if (!player.playerCreated()) throw new Error("Player does not exist in server.");
+  if (!player.playerCreated()) throw new Error("There is nothing playing.");
   return player;
 };
 
