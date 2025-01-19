@@ -60,34 +60,6 @@ async function execute(interaction) {
         }
         break;
 
-      // case "cancel":
-      //   try {
-      //     interaction.deferUpdate();
-      //   } catch (error) {
-      //     logger.error(error.stack);
-      //   }
-      //   break;
-
-      // case "remove":
-      //   try {
-      //     const remove = await removeLast(interaction.guildId);
-      //     console.log(remove);
-      //     // sendMessage(interaction, null, remove, null);
-      //     const collectorFilter = m => m.content.includes('discord');
-      //     const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 15_000 });
-          
-      //     collector.on('collect', m => {
-      //       console.log(`Collected ${m.content}`);
-      //     });
-          
-      //     collector.on('end', collected => {
-      //       console.log(`Collected ${collected.size} items`);
-      //     });
-      //   } catch (error) {
-      //     logger.error(error.stack);
-      //   }
-      //   break;
-
       default:
         break;
     }
