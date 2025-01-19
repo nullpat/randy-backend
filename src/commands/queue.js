@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
-import { sendReply } from "../helpers/helpers.js";
+import { sendMessage } from "../helpers/helpers.js";
 import { getQueue } from "../services/services.js";
 
 const data = new SlashCommandBuilder().setName("queue").setDescription("Displays songs in queue");
@@ -17,10 +17,10 @@ async function execute(interaction, message) {
     }));
     const prettierQueue = JSON.stringify(prettyQueue, null, 2);
     const formattedQueue = `\`\`\`json\n${prettierQueue}\n\`\`\``;
-    sendReply(interaction, message, formattedQueue);
+    sendMessage(interaction, message, formattedQueue);
   } catch (error) {
     logger.error(error.stack);
-    sendReply(interaction, message, error.message);
+    sendMessage(interaction, message, error.message);
   }
 }
 

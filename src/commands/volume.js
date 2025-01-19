@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
-import { sendReply } from "../helpers/helpers.js";
+import { sendMessage } from "../helpers/helpers.js";
 import { changeVolume } from "../services/services.js";
 
 const data = new SlashCommandBuilder()
@@ -15,16 +15,16 @@ async function execute(interaction, message, messageInput) {
   const guildId = message ? message.guildId : interaction.guildId;
 
   if (!volumeInput || !(volumeInput >= 0 && volumeInput <= 100)) {
-    sendReply(interaction, message, "Invalid input. Enter a number out of 100");
+    sendMessage(interaction, message, "Invalid input. Enter a number out of 100");
     return;
   }
 
   try {
     const volume = await changeVolume(guildId, volumeInput);
-    sendReply(interaction, message, volume);
+    sendMessage(interaction, message, volume);
   } catch (error) {
     logger.error(error.stack);
-    sendReply(interaction, message, error.message);
+    sendMessage(interaction, message, error.message);
   }
 }
 

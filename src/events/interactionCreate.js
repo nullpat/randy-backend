@@ -1,5 +1,7 @@
 import { MessageFlags } from "discord.js";
 import { logger } from "../utils/logger.js";
+import { removeLast } from "../services/services.js";
+import { sendMessage } from "../helpers/helpers.js";
 
 const name = "interactionCreate";
 const runOnce = false;
@@ -19,12 +21,12 @@ async function execute(interaction) {
       logger.error(error.stack);
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({
-          content: "There was an error while executing this command!",
+          content: error.message,
           flags: MessageFlags.Ephemeral,
         });
       } else {
         await interaction.reply({
-          content: "There was an error while executing this command!",
+          content: error.message,
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -49,14 +51,14 @@ async function execute(interaction) {
         }
         break;
 
-        case "undo":
-          try {
-            const undoCommand = interaction.client.commands.get("undo");
-            await undoCommand.execute(interaction);
-          } catch (error) {
-            logger.error(error.stack);
-          }
-          break;
+      case "undo":
+        try {
+          const undoCommand = interaction.client.commands.get("undo");
+          await undoCommand.execute(interaction);
+        } catch (error) {
+          logger.error(error.stack);
+        }
+        break;
 
       default:
         break;

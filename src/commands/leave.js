@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
-import { sendReply } from "../helpers/helpers.js";
+import { sendMessage } from "../helpers/helpers.js";
 import { leaveChannel } from "../services/services.js";
 
 const data = new SlashCommandBuilder()
@@ -12,10 +12,10 @@ async function execute(interaction, message) {
 
   try {
     const leave = await leaveChannel(guildId);
-    sendReply(interaction, message, leave);
+    sendMessage(interaction, message, leave);
   } catch (error) {
     logger.error(error.stack);
-    sendReply(interaction, message, error.message);
+    sendMessage(interaction, message, error.message);
   }
 }
 

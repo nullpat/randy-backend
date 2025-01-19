@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
-import { sendReply } from "../helpers/helpers.js";
+import { sendMessage } from "../helpers/helpers.js";
 import { joinChannel } from "../services/services.js";
 
 const data = new SlashCommandBuilder().setName("move").setDescription("Moves to your current voice channel");
@@ -10,16 +10,16 @@ async function execute(interaction, message) {
   const channelId = message ? message.member.voice.channel.id : interaction.member.voice.channel.id;
 
   if (!channelId) {
-    sendReply(interaction, message, "You are not in a voice channel.");
+    sendMessage(interaction, message, "You are not in a voice channel.");
     return;
   }
 
   try {
     const join = await joinChannel(guildId, channelId);
-    sendReply(interaction, message, join);
+    sendMessage(interaction, message, join);
   } catch (error) {
     logger.error(error.stack);
-    sendReply(interaction, message, error.message);
+    sendMessage(interaction, message, error.message);
   }
 }
 
