@@ -21,7 +21,7 @@ const execute = async (client) => {
     });
   }
 
-  async function deployCommands() {
+  const deployCommands = async () => {
     const commandData = client.commands.map((command) => command.data);
     try {
       const data = await rest.put(Routes.applicationCommands(clientId), {
@@ -31,7 +31,7 @@ const execute = async (client) => {
     } catch (error) {
       logger.error(error.stack);
     }
-  }
+  };
 
   setTimeout(deployCommands, 1000);
   client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
