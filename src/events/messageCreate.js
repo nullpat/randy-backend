@@ -15,7 +15,7 @@ const name = "messageCreate";
 const runOnce = false;
 const prefix = process.env.PREFIX;
 
-async function execute(message) {
+const execute = async (message) => {
   if (message.author.bot || !message.content.startsWith(prefix)) return;
 
   const trimmedContent = message.content.substring(prefix.length).trimStart();
@@ -104,6 +104,6 @@ async function execute(message) {
 
       break;
   }
-}
+};
 
 export { name, runOnce, execute };

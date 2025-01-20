@@ -10,8 +10,7 @@ const execute = async (interaction, message) => {
   const channelId = message ? message.member.voice.channel.id : interaction.member.voice.channel.id;
 
   if (!channelId) {
-    await sendMessage(interaction, message, "You are not in a voice channel.");
-    return;
+    return await sendMessage(interaction, message, "You are not in a voice channel.");
   }
 
   try {

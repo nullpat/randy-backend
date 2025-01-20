@@ -3,7 +3,7 @@ import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } fro
 import { logger } from "../utils/logger.js";
 import { sendMessage, editMessage } from "../helpers/helpers.js";
 import { addSong, joinChannel, nowPlaying } from "../services/services.js";
-import { isFirstStartEvent, toggleFirstStartFalse } from "../../index.js";
+import { isFirstStartEvent, toggleFirstStartFalse } from "../services/firstStartEvent.js";
 
 const data = new SlashCommandBuilder()
   .setName("play")
@@ -32,16 +32,16 @@ const execute = async (interaction, message, messageInput, isYT) => {
     const response = await sendMessage(interaction, message, play, actionRow);
 
     if (isFirstStartEvent) {
-      nowPlaying(guildId, isFirstStartEvent);
+      await nowPlaying(guildId, isFirstStartEvent);
       toggleFirstStartFalse();
     }
 
-    setTimeout(() => {
-      editMessage(interaction, response, play, null, "");
+    setTimeout(async () => {
+      await editMessage(interaction, response, play, null, "");
     }, 5000);
   } catch (error) {
     logger.error(error.stack);
-    sendMessage(interaction, message, error.message);
+    await sendMessage(interaction, message, error.message);
   }
 };
 

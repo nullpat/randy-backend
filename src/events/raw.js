@@ -34,8 +34,8 @@ lavaClient.on("raw", async (data) => {
   }
 });
 
-async function execute(data) {
+const execute = async (data) => {
   FastLink.other.handleRaw(data);
-}
+};
 
 export { name, runOnce, execute };

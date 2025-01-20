@@ -1,10 +1,11 @@
 import FastLink from "@performanc/fastlink";
 import errsole from "errsole";
 import { client } from "../musicbot.js";
-import { toggleFirstStartTrue } from "../../index.js";
+import { toggleFirstStartTrue } from "./firstStartEvent.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { editMessage } from "../helpers/helpers.js";
+import { formatSource } from "../helpers/helpers.js";
 
 const joinChannel = async (guildId, channelId) => {
   const player = new FastLink.player.Player(guildId);
@@ -241,21 +242,6 @@ const addSong = async (guildId, track, youtube) => {
   }
 };
 
-const formatSource = (sourceName) => {
-  switch (sourceName) {
-    case "youtube":
-      return "YouTube";
-    case "soundcloud":
-      return "SoundCloud";
-    case "deezer":
-      return "Deezer";
-    case "spotify":
-      return "Spotify";
-    default:
-      return sourceName;
-  }
-};
-
 const nowPlaying = async (guildId, isFirstStartEvent) => {
   const overrideChannels = [
     {
@@ -345,7 +331,6 @@ const services = {
   clearQueue,
   skipSong,
   addSong,
-  formatSource,
   nowPlaying,
   getCommands,
   checkLast,
@@ -367,7 +352,6 @@ export {
   clearQueue,
   skipSong,
   addSong,
-  formatSource,
   nowPlaying,
   getCommands,
   checkLast,

@@ -7,16 +7,16 @@ const data = new SlashCommandBuilder()
   .setName("leave")
   .setDescription("Leaves the current voice channel and ends playback");
 
-async function execute(interaction, message) {
+const execute = async (interaction, message) => {
   const guildId = message ? message.guildId : interaction.guildId;
 
   try {
     const leave = await leaveChannel(guildId);
-    sendMessage(interaction, message, leave);
+    await sendMessage(interaction, message, leave);
   } catch (error) {
     logger.error(error.stack);
-    sendMessage(interaction, message, error.message);
+    await sendMessage(interaction, message, error.message);
   }
-}
+};
 
 export { data, execute };

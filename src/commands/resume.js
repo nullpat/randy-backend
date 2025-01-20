@@ -5,16 +5,16 @@ import { resumeQueue } from "../services/services.js";
 
 const data = new SlashCommandBuilder().setName("resume").setDescription("Resumes playback");
 
-async function execute(interaction, message) {
+const execute = async (interaction, message) => {
   const guildId = message ? message.guildId : interaction.guildId;
 
   try {
     const resume = await resumeQueue(guildId);
-    sendMessage(interaction, message, resume);
+    await sendMessage(interaction, message, resume);
   } catch (error) {
     logger.error(error.stack);
-    sendMessage(interaction, message, error.message);
+    await sendMessage(interaction, message, error.message);
   }
-}
+};
 
 export { data, execute };
