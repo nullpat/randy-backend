@@ -7,7 +7,7 @@ const data = new SlashCommandBuilder().setName("move").setDescription("Moves to 
 
 const execute = async (interaction, message) => {
   const guildId = message ? message.guildId : interaction.guildId;
-  const channelId = message ? message.member.voice.channel.id : interaction.member.voice.channel.id;
+  const channelId = message ? message.member.voice.channel?.id : interaction.member.voice.channel?.id;
 
   if (!channelId) {
     return await sendMessage(interaction, message, "You are not in a voice channel.");
