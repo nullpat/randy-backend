@@ -4,9 +4,9 @@ import { sendMessage, editMessage, getComponent } from "../helpers/helpers.js";
 import { checkLast, removeLast } from "../services/services.js";
 import { ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 
-const data = new SlashCommandBuilder().setName("undo").setDescription("Removes the last queued song");
+const data = new SlashCommandBuilder().setName("undo").setDescription("Removes the song currently at the bottom of the queue");
 
-async function execute(interaction, message) {
+const execute = async (interaction, message) => {
   const guildId = message ? message.guildId : interaction.guildId;
   const userId = message ? message.author.id : interaction.user.id;
   const cancelButton = new ButtonBuilder().setCustomId("cancel").setLabel("Cancel").setStyle(ButtonStyle.Primary);
@@ -27,22 +27,22 @@ async function execute(interaction, message) {
         await confirmation.update({ content: "Undo cancelled.", components: [] });
       }
     } catch {
-      editMessage(interaction, response, "Undo confirmation not received.", null, "");
+      await editMessage(interaction, response, "Undo confirmation not received.", null, "");
     }
   };
 
   try {
     const last = await checkLast(guildId);
     if (!last) {
-      sendMessage(interaction, message, "Queue is already empty");
+      await sendMessage(interaction, message, "Queue is already empty");
     }
 
     const response = await sendMessage(interaction, message, last, row, true);
     await handleConfirmation(response, userId, guildId);
   } catch (error) {
     logger.error(error.stack);
-    sendMessage(interaction, message, error.message);
+    await sendMessage(interaction, message, error.message);
   }
-}
+};
 
 export { data, execute };

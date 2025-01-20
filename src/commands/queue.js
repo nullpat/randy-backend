@@ -3,9 +3,9 @@ import { logger } from "../utils/logger.js";
 import { sendMessage } from "../helpers/helpers.js";
 import { getQueue } from "../services/services.js";
 
-const data = new SlashCommandBuilder().setName("queue").setDescription("Displays songs in queue");
+const data = new SlashCommandBuilder().setName("queue").setDescription("Displays a list of queued songs");
 
-async function execute(interaction, message) {
+const execute = async (interaction, message) => {
   const guildId = message ? message.guildId : interaction.guildId;
 
   try {
@@ -17,11 +17,11 @@ async function execute(interaction, message) {
     }));
     const prettierQueue = JSON.stringify(prettyQueue, null, 2);
     const formattedQueue = `\`\`\`json\n${prettierQueue}\n\`\`\``;
-    sendMessage(interaction, message, formattedQueue);
+    await sendMessage(interaction, message, formattedQueue);
   } catch (error) {
     logger.error(error.stack);
-    sendMessage(interaction, message, error.message);
+    await sendMessage(interaction, message, error.message);
   }
-}
+};
 
 export { data, execute };

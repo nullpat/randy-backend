@@ -10,22 +10,22 @@ const data = new SlashCommandBuilder()
     option.setName("volume").setDescription("Sets the volume to a number out of 100").setRequired(true),
   );
 
-async function execute(interaction, message, messageInput) {
+const execute = async (interaction, message, messageInput) => {
   const volumeInput = message ? messageInput : interaction.options.getNumber("volume");
   const guildId = message ? message.guildId : interaction.guildId;
 
   if (!volumeInput || !(volumeInput >= 0 && volumeInput <= 100)) {
-    sendMessage(interaction, message, "Invalid input. Enter a number out of 100");
+    await sendMessage(interaction, message, "Invalid input. Enter a number out of 100");
     return;
   }
 
   try {
     const volume = await changeVolume(guildId, volumeInput);
-    sendMessage(interaction, message, volume);
+    await sendMessage(interaction, message, volume);
   } catch (error) {
     logger.error(error.stack);
-    sendMessage(interaction, message, error.message);
+    await sendMessage(interaction, message, error.message);
   }
-}
+};
 
 export { data, execute };

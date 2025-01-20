@@ -28,16 +28,6 @@ process.on("warning", (error) => {
 
 client.login(process.env.DISCORD_TOKEN);
 
-let isFirstStartEvent = true;
-
-function toggleFirstStartTrue() {
-  isFirstStartEvent = true;
-}
-
-function toggleFirstStartFalse() {
-  isFirstStartEvent = false;
-}
-
 const app = express();
 const port = process.env.API_PORT;
 const frontendUrl = process.env.FRONTEND_URL;
@@ -53,5 +43,3 @@ app.use(errorHandler);
 app.listen(port, () => {
   console.log(`API is accessible at http://localhost:${port}`);
 });
-
-export { isFirstStartEvent, toggleFirstStartTrue, toggleFirstStartFalse };
