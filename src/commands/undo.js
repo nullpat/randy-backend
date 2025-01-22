@@ -1,10 +1,11 @@
-import { SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { sendMessage, editMessage, getComponent } from "../helpers/helpers.js";
 import { checkLast, removeLast } from "../services/services.js";
-import { ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
+import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 
-const data = new SlashCommandBuilder().setName("undo").setDescription("Removes the song currently at the bottom of the queue");
+const data = new SlashCommandBuilder()
+  .setName("undo")
+  .setDescription("Removes the song currently at the bottom of the queue");
 
 const execute = async (interaction, message) => {
   const guildId = message ? message.guildId : interaction.guildId;

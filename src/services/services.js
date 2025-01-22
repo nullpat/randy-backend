@@ -4,8 +4,7 @@ import { client } from "../musicbot.js";
 import { toggleFirstStartTrue } from "./firstStartEvent.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
-import { editMessage } from "../helpers/helpers.js";
-import { formatSource } from "../helpers/helpers.js";
+import { editMessage, formatSource } from "../helpers/helpers.js";
 
 const joinChannel = async (guildId, channelId) => {
   const player = new FastLink.player.Player(guildId);
@@ -272,7 +271,7 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
       return;
     }
 
-    if (!channel || !channel.isTextBased()) {
+    if (!channel?.isTextBased()) {
       logger.error(`Channel Id must exist and allow text: ${voiceData.channelId}`);
       return;
     }
