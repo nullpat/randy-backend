@@ -129,7 +129,7 @@ const autoLeave = async (guildId) => {
     }
   };
 
-  async function checkQueue(guildId) {
+  const checkQueue = async (guildId) => {
     try {
       const queue = await getQueue(guildId);
 
@@ -148,7 +148,7 @@ const autoLeave = async (guildId) => {
       errsole.warn(error.stack);
       clearTimers();
     }
-  }
+  };
 
   intervalId = setInterval(async () => {
     await checkQueue(guildId);
