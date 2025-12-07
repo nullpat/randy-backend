@@ -28,7 +28,7 @@ const leaveChannel = async (guildId) => {
   });
   player.destroy();
   toggleFirstStartTrue();
-  client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
+  client.user.setPresence({ activities: [{ name: "Listening to you sleep", type: 3 }] });
   return "Disconnected.";
 };
 
@@ -265,7 +265,7 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
     const row = isFirstStartEvent ? undoRow : normalRow;
 
     if (queue.length === 0) {
-      client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
+      client.user.setPresence({ activities: [{ name: "Listening to you sleep", type: 3 }] });
       autoLeave(guildId);
       return;
     }
@@ -293,7 +293,7 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
 
     const response = await channel.send({ embeds: [nowPlaying], components: [row] });
     client.user.setPresence({
-      activities: [{ name: `${title} - ${author}`, type: 2 }],
+      activities: [{ name: `Listening to ${title} - ${author}`, type: 2}],
     });
     if (isFirstStartEvent) {
       setTimeout(() => {
