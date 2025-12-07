@@ -34,7 +34,7 @@ const execute = async (client) => {
   };
 
   setTimeout(deployCommands, 1000);
-  client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
+  client.user.setPresence({ activities: [{ name: "Watching you sleep", type: 3 }] });
 };
 
 export { name, runOnce, execute };
