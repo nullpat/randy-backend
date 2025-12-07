@@ -2,7 +2,7 @@ import { readdirSync } from "fs";
 import { REST, Routes } from "discord.js";
 import { logger } from "../utils/logger.js";
 
-const name = "ready";
+const name = "clientReady";
 const runOnce = true;
 const clientId = process.env.DISCORD_CLIENT_ID;
 const token = process.env.DISCORD_TOKEN;
@@ -34,7 +34,7 @@ const execute = async (client) => {
   };
 
   setTimeout(deployCommands, 1000);
-  client.user.setPresence({ activities: [{ name: "Listening to you sleep", type: 3 }] });
+  client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
 };
 
 export { name, runOnce, execute };
