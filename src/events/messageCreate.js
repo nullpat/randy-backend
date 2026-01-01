@@ -9,6 +9,7 @@ import { execute as volumeCommand } from "../commands/volume.js";
 import { execute as leaveCommand } from "../commands/leave.js";
 import { execute as hjelpCommand } from "../commands/hjelp.js";
 import { execute as undoCommand } from "../commands/undo.js";
+import { execute as birthdayCommand} from "../commands/birthdays.js"
 import { logger } from "../utils/logger.js";
 
 const name = "messageCreate";
@@ -23,6 +24,13 @@ const execute = async (message) => {
   const messageInput = trimmedContent.split(" ").slice(1).join(" ");
 
   switch (commandName) {
+    case "bd":
+    case "bday":
+    case "birthday":
+    case "birthdays":
+      birthdayCommand(null, message)
+      break;
+
     case "q":
     case "queue":
       queueCommand(null, message);

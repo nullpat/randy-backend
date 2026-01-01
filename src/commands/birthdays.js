@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
-// helpers import
-// services import
+import { sendMessage } from "../helpers/helpers.js";
+import { birthdays } from "../services/services.js";
 
 const data = new SlashCommandBuilder()
   .setName("birthdays")
@@ -9,14 +9,13 @@ const data = new SlashCommandBuilder()
 
 const execute = async (interaction, message) => {
   const guildId = message ? message.guildId : interaction.guildId;
-// retool logic below after helpers and services
   try {
-    const clear = await clearQueue(guildId);
-    await sendMessage(interaction, message, clear);
+    const birthdayList = birthdays(); 
+    await sendMessage(interaction, message, birthdayList);
   } catch (error) {
     logger.error(error.stack);
     await sendMessage(interaction, message, error.message);
   }
 };
 
-// export { data, execute };
+export { data, execute };

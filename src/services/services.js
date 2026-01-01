@@ -5,6 +5,13 @@ import { toggleFirstStartTrue } from "./firstStartEvent.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { editMessage, formatSource } from "../helpers/helpers.js";
+import { birthdays as birthdayList } from "../../dummybirthdays.js";
+
+const birthdays = () => {
+  let prettierBirthdays = JSON.stringify(birthdayList, null, 2)
+  if (!birthdayList) throw new Error("No birthday list found.")
+    return prettierBirthdays;
+}
 
 const joinChannel = async (guildId, channelId) => {
   const player = new FastLink.player.Player(guildId);
@@ -315,6 +322,7 @@ const getCommands = () => {
 };
 
 const services = {
+  birthdays,
   joinChannel,
   getPlayer,
   leaveChannel,
@@ -336,6 +344,7 @@ const services = {
 };
 
 export {
+  birthdays,
   joinChannel,
   getPlayer,
   leaveChannel,
