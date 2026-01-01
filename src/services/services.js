@@ -8,9 +8,10 @@ import { editMessage, formatSource } from "../helpers/helpers.js";
 import { birthdays as birthdayList } from "../../dummybirthdays.js";
 
 const birthdays = () => {
-  let prettierBirthdays = JSON.stringify(birthdayList, null, 2)
+  let prettierBirthdays = JSON.stringify(birthdayList, null, 2);
+  let formattedBirthdays = `\`\`\`${prettierBirthdays}\`\`\``;
   if (!birthdayList) throw new Error("No birthday list found.")
-    return prettierBirthdays;
+    return formattedBirthdays;
 }
 
 const joinChannel = async (guildId, channelId) => {
