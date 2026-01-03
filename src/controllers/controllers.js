@@ -1,14 +1,14 @@
 import services from "../services/services.js";
 
-const joinChannel = async (req, res, next) => {
+const moveChannel = async (req, res, next) => {
   const { guildId, channelId } = req.body;
   if (!guildId || !channelId) {
     res.status(400).send("Missing 'Content-Type' header or 'guildId', 'channelId' parameters in body");
     return;
   }
   try {
-    const join = await services.joinChannel(guildId, channelId);
-    res.status(200).send(join);
+    const move = await services.moveChannel(guildId, channelId);
+    res.status(200).send(move);
   } catch (error) {
     next(error);
   }
@@ -187,7 +187,7 @@ const getCommands = async (req, res, next) => {
 };
 
 const controllers = {
-  joinChannel,
+  moveChannel,
   leaveChannel,
   changeVolume,
   getServers,

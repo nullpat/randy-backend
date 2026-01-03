@@ -64,19 +64,4 @@ const getComponent = async (response, msgFilter, msgTime) => {
   }
 };
 
-const formatSource = (sourceName) => {
-  switch (sourceName) {
-    case "youtube":
-      return "YouTube";
-    case "soundcloud":
-      return "SoundCloud";
-    case "deezer":
-      return "Deezer";
-    case "spotify":
-      return "Spotify";
-    default:
-      return sourceName;
-  }
-};
-
-export { sendMessage, editMessage, getComponent, formatSource };
+export { sendMessage, editMessage, getComponent };

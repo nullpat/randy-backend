@@ -2,7 +2,7 @@ import FastLink from "@performanc/fastlink";
 import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { sendMessage, editMessage } from "../helpers/helpers.js";
-import { addSong, joinChannel, nowPlaying } from "../services/services.js";
+import { addSong, connectPlayer, nowPlaying } from "../services/services.js";
 import { isFirstStartEvent, toggleFirstStartFalse } from "../services/firstStartEvent.js";
 import client from "../musicbot.js";
 
@@ -15,6 +15,7 @@ const execute = async (interaction, message, messageInput, youtubeFlag) => {
   const songInput = message ? messageInput : interaction.options.getString("song");
   const guildId = message ? message.guildId : interaction.guildId;
   const channelId = message ? message.member.voice.channel?.id : interaction.member.voice.channel?.id;
+  // const textId = message ? message.channelId : interaction.guildId;
   const requesterId = message ? message.member : interaction.member;
 
   const undoButton = new ButtonBuilder().setCustomId("undo").setLabel("Undo").setStyle(ButtonStyle.Secondary);
@@ -23,12 +24,11 @@ const execute = async (interaction, message, messageInput, youtubeFlag) => {
   const youtubeSearch = youtubeFlag ?? interaction.commandName === "youtube";
 
   try {
-
     if (!channelId) {
       return await sendMessage(interaction, message, "You are not in a voice channel.");
     }
-  
-    await joinChannel(guildId, channelId);
+
+    await connectPlayer(guildId, channelId);
     const play = await addSong(guildId, songInput, requesterId, youtubeSearch);
     const response = await sendMessage(interaction, message, play, actionRow);
 
