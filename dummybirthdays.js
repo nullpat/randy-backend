@@ -13,7 +13,7 @@ const birthdays = [
   },
   {
     server: "889971568732684298",
-    name: "ozymandias3",
+    name: "ozymandias1",
     month: "4",
     day: "16"
   },
@@ -31,7 +31,7 @@ const birthdays = [
   },
   {
     server: "1207461053949284392",
-    name: "ozymandias3",
+    name: "ozymandias2",
     month: "4",
     day: "16"
   },

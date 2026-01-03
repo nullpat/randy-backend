@@ -3,9 +3,7 @@ import { logger } from "../utils/logger.js";
 import { sendMessage } from "../helpers/helpers.js";
 import { getBirthdays } from "../services/services.js";
 
-const data = new SlashCommandBuilder()
-  .setName("birthday")
-  .setDescription("Displays a list of birthdays");
+const data = new SlashCommandBuilder().setName("birthday").setDescription("Displays a list of birthdays");
 
 const execute = async (interaction, message) => {
   const guildId = message ? message.guildId : interaction.guildId;

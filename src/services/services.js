@@ -17,16 +17,16 @@ const getBirthdays = (guildId) => {
 };
 
 const checkBirthdays = () => {
-    // cron.schedule("0 0 * * *", () => {
-    // checks every minute for testing below
-    cron.schedule("* * * * *", () => {
+  // cron.schedule("0 0 * * *", () => {
+  // checks every minute for testing below
+  cron.schedule("* * * * *", () => {
     const today = new Date();
 
     const month = today.getMonth() + 1;
     const day = today.getDate();
 
     birthdays.forEach((member) => {
-      if ((member.month) == month && (member.day) == day) {
+      if (member.month == month && member.day == day) {
         sendBirthdays(member);
       }
     });
