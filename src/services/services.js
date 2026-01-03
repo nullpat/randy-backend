@@ -23,11 +23,11 @@ const checkBirthdays = () => {
     const today = new Date();
 
     const month = today.getMonth() + 1;
-    const day = today.getDate();
+    const day = today.getDate() + 1;
 
-    birthdays.forEach((member) => {
-      if (member.month == month && member.day == day) {
-        sendBirthdays(member);
+    birthdays.forEach((user) => {
+      if (user.month == month && user.day == day) {
+        sendBirthdays(user);
       }
     });
   });

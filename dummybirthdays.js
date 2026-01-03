@@ -3,7 +3,7 @@ const birthdays = [
     server: "889971568732684298",
     name: "tim1",
     month: "1",
-    day: "2"
+    day: "4"
   },
   {
     server: "889971568732684298",
