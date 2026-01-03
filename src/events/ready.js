@@ -1,6 +1,7 @@
 import { readdirSync } from "fs";
 import { REST, Routes } from "discord.js";
 import { logger } from "../utils/logger.js";
+import { checkBirthdays } from "../services/services.js";
 
 const name = "clientReady";
 const runOnce = true;
@@ -35,6 +36,7 @@ const execute = async (client) => {
 
   setTimeout(deployCommands, 1000);
   client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
+  checkBirthdays();
 };
 
 export { name, runOnce, execute };

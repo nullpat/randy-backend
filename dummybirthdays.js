@@ -1,7 +1,40 @@
-const birthdays = {
-    tim : "12-25",
-    jim : "6-10",
-    ozymandias: "4-16"
-}
+const birthdays = [
+  {
+    server: "889971568732684298",
+    name: "tim1",
+    month: "1",
+    day: "2"
+  },
+  {
+    server: "889971568732684298",
+    name: "jim1",
+    month: "6",
+    day: "10"
+  },
+  {
+    server: "889971568732684298",
+    name: "ozymandias3",
+    month: "4",
+    day: "16"
+  },
+  {
+    server: "1207461053949284392",
+    name: "tim2",
+    month: "1",
+    day: "2"
+  },
+  {
+    server: "1207461053949284392",
+    name: "jim2",
+    month: "6",
+    day: "10"
+  },
+  {
+    server: "1207461053949284392",
+    name: "ozymandias3",
+    month: "4",
+    day: "16"
+  },
+];
 
-export { birthdays };
+export default birthdays;

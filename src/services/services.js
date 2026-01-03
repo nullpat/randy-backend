@@ -5,14 +5,38 @@ import { toggleFirstStartTrue } from "./firstStartEvent.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { editMessage, formatSource } from "../helpers/helpers.js";
-import { birthdays as birthdayList } from "../../dummybirthdays.js";
+import birthdays from "../../dummybirthdays.js";
+import cron from "node-cron";
 
-const birthdays = () => {
-  let prettierBirthdays = JSON.stringify(birthdayList, null, 2);
-  let formattedBirthdays = `\`\`\`${prettierBirthdays}\`\`\``;
-  if (!birthdayList) throw new Error("No birthday list found.")
-    return formattedBirthdays;
-}
+const getBirthdays = (guildId) => {
+  if (!birthdays) throw new Error("No birthday list found.");
+  const guildBirthdays = birthdays.filter((user) => user.server === guildId);
+  const prettierBirthdays = JSON.stringify(guildBirthdays, null, 2);
+  const formattedBirthdays = `\`\`\`${prettierBirthdays}\`\`\``;
+  return formattedBirthdays;
+};
+
+const checkBirthdays = () => {
+    // cron.schedule("0 0 * * *", () => {
+    // checks every minute for testing below
+    cron.schedule("* * * * *", () => {
+    const today = new Date();
+
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+
+    birthdays.forEach((member) => {
+      if ((member.month) == month && (member.day) == day) {
+        sendBirthdays(member);
+      }
+    });
+  });
+};
+
+const sendBirthdays = (birthdayPerson) => {
+  console.log("wa wa wee wa");
+  console.log(birthdayPerson);
+};
 
 const joinChannel = async (guildId, channelId) => {
   const player = new FastLink.player.Player(guildId);
@@ -301,7 +325,7 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
 
     const response = await channel.send({ embeds: [nowPlaying], components: [row] });
     client.user.setPresence({
-      activities: [{ name: `Listening to ${title} - ${author}`, type: 2}],
+      activities: [{ name: `Listening to ${title} - ${author}`, type: 2 }],
     });
     if (isFirstStartEvent) {
       setTimeout(() => {
@@ -323,7 +347,9 @@ const getCommands = () => {
 };
 
 const services = {
-  birthdays,
+  getBirthdays,
+  checkBirthdays,
+  sendBirthdays,
   joinChannel,
   getPlayer,
   leaveChannel,
@@ -345,7 +371,9 @@ const services = {
 };
 
 export {
-  birthdays,
+  getBirthdays,
+  checkBirthdays,
+  sendBirthdays,
   joinChannel,
   getPlayer,
   leaveChannel,

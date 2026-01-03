@@ -9,7 +9,7 @@ import { execute as volumeCommand } from "../commands/volume.js";
 import { execute as leaveCommand } from "../commands/leave.js";
 import { execute as hjelpCommand } from "../commands/hjelp.js";
 import { execute as undoCommand } from "../commands/undo.js";
-import { execute as birthdayCommand} from "../commands/birthdays.js"
+import { execute as birthdayCommand } from "../commands/birthday.js"
 import { logger } from "../utils/logger.js";
 
 const name = "messageCreate";
