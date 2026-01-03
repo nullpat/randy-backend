@@ -2,7 +2,7 @@ import errsole from "errsole";
 import ErrsoleSQLite from "errsole-sqlite";
 import express from "express";
 import router from "./src/routes/routes.js";
-import { client } from "./src/musicbot.js";
+import client from "./src/musicbot.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 import { logger } from "./src/utils/logger.js";
 import cors from "cors";

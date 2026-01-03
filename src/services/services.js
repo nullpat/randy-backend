@@ -1,28 +1,29 @@
 import FastLink from "@performanc/fastlink";
 import errsole from "errsole";
-import { client } from "../musicbot.js";
+import client from "../musicbot.js";
 import { toggleFirstStartTrue } from "./firstStartEvent.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { editMessage, formatSource } from "../helpers/helpers.js";
 
-const joinChannel = async (guildId, channelId) => {
-  const player = new FastLink.player.Player(guildId);
-  if (!player.playerCreated()) player.createPlayer();
-  player.connect(channelId, { mute: false, deaf: true }, (guildId, payload) => {
-    client.guilds.cache.get(guildId).shard.send(payload);
-  });
+const joinChannel = async (guildId, voiceId, textId) => {
+  const player = client.aqua.createConnection({
+    guildId: guildId,
+    voiceChannel: voiceId,
+    textChannel: textId,
+    deaf: true,
+});
   return "Joined voice channel.";
 };
 
-const getPlayer = async (guildId) => {
-  const player = new FastLink.player.Player(guildId);
-  if (!player.playerCreated()) throw new Error("There is nothing playing.");
-  return player;
-};
+// const getPlayer = async (guildId) => {
+//   const player = new FastLink.player.Player(guildId);
+//   if (!player.playerCreated()) throw new Error("There is nothing playing.");
+//   return player;
+// };
 
 const leaveChannel = async (guildId) => {
-  const player = await getPlayer(guildId);
+  const player = await client.aqua.get(guildId);
   player.connect(null, null, (guildId, payload) => {
     client.guilds.cache.get(guildId).shard.send(payload);
   });
@@ -33,7 +34,7 @@ const leaveChannel = async (guildId) => {
 };
 
 const changeVolume = async (guildId, volume) => {
-  const player = await getPlayer(guildId);
+  const player = await client.aqua.get(guildId);
   player.update({
     volume: parseInt(volume),
   });
@@ -101,13 +102,13 @@ const getVoice = async (guildId) => {
 };
 
 const getQueue = async (guildId) => {
-  const player = await getPlayer(guildId);
+  const player = await client.aqua.get(guildId);
   const rawQueue = await player.getQueue();
   if (rawQueue.length === 0) {
     return rawQueue;
   }
-  const queue = await player.decodeTracks(rawQueue);
-  return queue;
+  // const queue = await player.decodeTracks(rawQueue);
+  return rawQueue;
 };
 
 const autoLeave = async (guildId) => {
@@ -154,26 +155,26 @@ const autoLeave = async (guildId) => {
 };
 
 const pauseQueue = async (guildId) => {
-  const player = await getPlayer(guildId);
+  const player = await client.aqua.get(guildId);
   player.update({ paused: true });
   return "Paused the queue.";
 };
 
 const resumeQueue = async (guildId) => {
-  const player = await getPlayer(guildId);
+  const player = await client.aqua.get(guildId);
   player.update({ paused: false });
   return "Resumed the queue.";
 };
 
 const clearQueue = async (guildId) => {
-  const player = await getPlayer(guildId);
+  const player = await client.aqua.get(guildId);
   player.update({ track: { encoded: null } });
   toggleFirstStartTrue();
   return "Cleared the queue.";
 };
 
 const checkLast = async (guildId) => {
-  const player = await getPlayer(guildId);
+  const player = await client.aqua.get(guildId);
   const removedTrack = player.info.queue.slice(-1);
   if (removedTrack.length === 0) {
     return;
@@ -184,7 +185,7 @@ const checkLast = async (guildId) => {
 };
 
 const removeLast = async (guildId) => {
-  const player = await getPlayer(guildId);
+  const player = await client.aqua.get(guildId);
   const removedTrack = player.info.queue.slice(-1);
   const decodedTrack = await player.decodeTracks(removedTrack);
   if (player.info.queue.length === 1) {
@@ -196,48 +197,86 @@ const removeLast = async (guildId) => {
 };
 
 const skipSong = async (guildId) => {
-  const player = await getPlayer(guildId);
+  const player = await client.aqua.get(guildId);
   const skip = player.skipTrack();
   return skip;
 };
 
-const addSong = async (guildId, track, youtube) => {
-  const player = await getPlayer(guildId);
-  const loadPrefix = track.startsWith("https://") ? "" : youtube ? "ytsearch:" : "dzsearch:";
-  const load = await player.loadTrack(loadPrefix + track);
-  const { loadType, data } = load;
+const addSong = async (guildId, query, requester, youtubeFlag) => {
+
+  const player = await client.aqua.get(guildId);
+
+  const options = {
+    query: query,
+    requester: requester
+};
+
+if (youtubeFlag) {
+  options.source = ytsearch;
+}
+
+  const resolve = await client.aqua.resolve(options);
+  const { loadType, tracks, playlistInfo } = resolve;
 
   switch (loadType) {
-    case "playlist":
-    case "album":
-    case "station":
-    case "show":
-    case "podcast":
-    case "artist":
-      player.update({
-        tracks: { encodeds: data.tracks.map(({ encoded }) => encoded) },
-      });
-      const formattedPlaylistSource = formatSource(data.tracks[0].info.sourceName);
-      return `Added ${data.tracks.length} songs from ${formattedPlaylistSource}.`;
-
-    case "track":
-    case "short":
-      player.update({
-        track: { encoded: data.encoded },
-      });
-      const formattedTrackSource = formatSource(data.info.sourceName);
-      return `Added ${data.info.title} from ${formattedTrackSource}.`;
-
-    case "search":
-      player.update({
-        track: { encoded: data[0].encoded },
-      });
-      const formattedSearchSource = formatSource(data[0].info.sourceName);
-      return `Added ${data[0].info.title} from ${formattedSearchSource} search.`;
-
+    case 'playlist': {
+      player.queue.add(tracks);
+      if (!player.playing && !player.paused) {
+        player.play();
+    }
+      return `Added ${tracks.length} songs from ${playlistInfo.name}.`
+    }
+  
+    case 'search':
+    case 'track': {
+      const [track] = tracks;
+      player.queue.add(track);
+      if (!player.playing && !player.paused) {
+        player.play();
+    }
+      return `Added **${track.title}** to the queue.`
+    }
+  
     default:
       throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
   }
+
+  // const player = await getPlayer(guildId);
+  // const loadPrefix = track.startsWith("https://") ? "" : youtube ? "ytsearch:" : "dzsearch:";
+  // const load = await player.loadTrack(loadPrefix + track);
+  // const { loadType, data } = load;
+
+  // switch (loadType) {
+  //   case "playlist":
+  //   case "album":
+  //   case "station":
+  //   case "show":
+  //   case "podcast":
+  //   case "artist":
+  //     player.update({
+  //       tracks: { encodeds: data.tracks.map(({ encoded }) => encoded) },
+  //     });
+  //     const formattedPlaylistSource = formatSource(data.tracks[0].info.sourceName);
+  //     return `Added ${data.tracks.length} songs from ${formattedPlaylistSource}.`;
+
+  //   case "track":
+  //   case "short":
+  //     player.update({
+  //       track: { encoded: data.encoded },
+  //     });
+  //     const formattedTrackSource = formatSource(data.info.sourceName);
+  //     return `Added ${data.info.title} from ${formattedTrackSource}.`;
+
+  //   case "search":
+  //     player.update({
+  //       track: { encoded: data[0].encoded },
+  //     });
+  //     const formattedSearchSource = formatSource(data[0].info.sourceName);
+  //     return `Added ${data[0].info.title} from ${formattedSearchSource} search.`;
+
+  //   default:
+  //     throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
+  // }
 };
 
 const nowPlaying = async (guildId, isFirstStartEvent) => {
@@ -275,8 +314,7 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
       return;
     }
 
-    const { title, author, uri, artworkUrl } = queue[0].info;
-    const albumName = queue[0].pluginInfo.albumName || "";
+    const { title, author, uri, artworkUrl } = queue[0];
 
     const nowPlaying = new EmbedBuilder()
       .setTitle(title)
@@ -285,8 +323,7 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
         name: "Now Playing",
       })
       .setDescription(
-        `${author}
-        ${albumName}`,
+        `${author}`,
       )
       .setThumbnail(artworkUrl)
       .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
@@ -316,7 +353,7 @@ const getCommands = () => {
 
 const services = {
   joinChannel,
-  getPlayer,
+  // getPlayer,
   leaveChannel,
   changeVolume,
   getServers,
@@ -337,7 +374,7 @@ const services = {
 
 export {
   joinChannel,
-  getPlayer,
+  // getPlayer,
   leaveChannel,
   changeVolume,
   getServers,

@@ -35,6 +35,9 @@ const execute = async (client) => {
 
   setTimeout(deployCommands, 1000);
   client.user.setPresence({ activities: [{ name: "Watching you sleep", type: 3 }] });
+
+  client.aqua.init(client.user.id);
+  console.log(`Logged in as ${client.user.tag}`);
 };
 
 export { name, runOnce, execute };
