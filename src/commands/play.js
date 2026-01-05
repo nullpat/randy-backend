@@ -13,7 +13,6 @@ const execute = async (interaction, message, messageInput, youtubeFlag) => {
   const songInput = message ? messageInput : interaction.options.getString("song");
   const guildId = message ? message.guildId : interaction.guildId;
   const channelId = message ? message.member.voice.channel?.id : interaction.member.voice.channel?.id;
-  // const textId = message ? message.channelId : interaction.guildId;
   const requesterId = message ? message.member : interaction.member;
 
   const undoButton = new ButtonBuilder().setCustomId("undo").setLabel("Undo").setStyle(ButtonStyle.Secondary);
@@ -30,7 +29,6 @@ const execute = async (interaction, message, messageInput, youtubeFlag) => {
     const play = await addSong(guildId, songInput, requesterId, youtubeSearch);
     const response = await sendMessage(interaction, message, play, actionRow);
 
-    // await nowPlaying(guildId, true);
     setTimeout(async () => {
       await editMessage(interaction, response, play, null, "");
     }, 5000);

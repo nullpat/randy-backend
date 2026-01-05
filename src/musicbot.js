@@ -1,6 +1,7 @@
 import { Client, Collection, GatewayIntentBits } from "discord.js";
 import { readdirSync } from "fs";
 import { Aqua } from "aqualink";
+import { nowPlaying } from "./services/services.js";
 
 const lavaHostname = process.env.LAVA_HOSTNAME;
 const lavaSecure = process.env.LAVA_SECURE === "true";
@@ -21,12 +22,12 @@ const client = new Client({
 
 const nodes = [
   {
-      host: lavaHostname,
-      password: lavaPassword,
-      port: lavaPort,
-      ssl: lavaSecure,
-      name: botId
-  }
+    host: lavaHostname,
+    password: lavaPassword,
+    port: lavaPort,
+    ssl: lavaSecure,
+    name: botId,
+  },
 ];
 
 const aqua = new Aqua(client, nodes, {
@@ -34,8 +35,8 @@ const aqua = new Aqua(client, nodes, {
   restVersion: "v4",
   autoResume: true,
   infiniteReconnects: true,
-  loadBalancer: 'LeastLoad',
-  leaveOnEnd: false
+  loadBalancer: "LeastLoad",
+  leaveOnEnd: false,
 });
 
 client.aqua = aqua;
@@ -53,5 +54,23 @@ for (const eventFile of eventFiles) {
     }
   });
 }
+
+client.aqua.on("nodeConnect", (node) => {
+  console.log(`Node connected: ${node.name}`);
+});
+
+client.aqua.on("nodeError", (node, error) => {
+  console.log(`Node "${node.name}" encountered an error: ${error.message}.`);
+});
+
+client.aqua.on('trackStart', async (player, track) => {
+  await nowPlaying(player.guildId, true);
+});
+
+client.aqua.on("queueEnd", (player) => {
+  const channel = client.channels.cache.get(player.textChannel);
+  if (channel) channel.send("The queue has ended.");
+  player.destroy();
+});
 
 export default client;

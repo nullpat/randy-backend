@@ -263,7 +263,7 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
 
     const { title, author, uri, artworkUrl } = queue[0];
 
-    const nowPlaying = new EmbedBuilder()
+    const nowPlayingEmbed = new EmbedBuilder()
       .setTitle(title)
       .setURL(uri)
       .setAuthor({
@@ -273,7 +273,7 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
       .setThumbnail(artworkUrl)
       .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
 
-    const response = await channel.send({ embeds: [nowPlaying], components: [row] });
+    const response = await channel.send({ embeds: [nowPlayingEmbed], components: [row] });
     client.user.setPresence({
       activities: [{ name: `Listening to ${title} - ${author}`, type: 2 }],
     });
