@@ -1,4 +1,3 @@
-import FastLink from "@performanc/fastlink";
 import errsole from "errsole";
 import client from "../musicbot.js";
 import { toggleFirstStartTrue } from "./firstStartEvent.js";

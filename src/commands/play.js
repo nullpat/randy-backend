@@ -1,10 +1,8 @@
-import FastLink from "@performanc/fastlink";
 import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { sendMessage, editMessage } from "../helpers/helpers.js";
 import { addSong, connectPlayer, nowPlaying } from "../services/services.js";
 import { isFirstStartEvent, toggleFirstStartFalse } from "../services/firstStartEvent.js";
-import client from "../musicbot.js";
 
 const data = new SlashCommandBuilder()
   .setName("play")
@@ -32,7 +30,7 @@ const execute = async (interaction, message, messageInput, youtubeFlag) => {
     const play = await addSong(guildId, songInput, requesterId, youtubeSearch);
     const response = await sendMessage(interaction, message, play, actionRow);
 
-    await nowPlaying(guildId, true);
+    // await nowPlaying(guildId, true);
     setTimeout(async () => {
       await editMessage(interaction, response, play, null, "");
     }, 5000);
