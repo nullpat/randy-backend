@@ -8,7 +8,7 @@ const data = new SlashCommandBuilder()
   .setDescription("Leaves the current voice channel and ends playback");
 
 const execute = async (interaction, message) => {
-  const guildId = message ? message.guildId : interaction.guildId;
+  const guildId = message?.guildId ?? interaction.guildId;
 
   try {
     const leave = await leaveChannel(guildId);

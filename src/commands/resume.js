@@ -6,7 +6,7 @@ import { resumeQueue } from "../services/services.js";
 const data = new SlashCommandBuilder().setName("resume").setDescription("Resumes playback");
 
 const execute = async (interaction, message) => {
-  const guildId = message ? message.guildId : interaction.guildId;
+  const guildId = message?.guildId ?? interaction.guildId;
 
   try {
     const resume = await resumeQueue(guildId);

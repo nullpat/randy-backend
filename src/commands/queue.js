@@ -6,10 +6,15 @@ import { getQueue } from "../services/services.js";
 const data = new SlashCommandBuilder().setName("queue").setDescription("Displays a list of queued songs");
 
 const execute = async (interaction, message) => {
-  const guildId = message ? message.guildId : interaction.guildId;
+  const guildId = message?.guildId ?? interaction.guildId;
 
   try {
     const queue = await getQueue(guildId);
+
+    if (!queue || queue.length === 0) {
+      return await sendMessage(interaction, message, "The queue is empty.");
+    }
+
     const prettyQueue = queue.map((song) => ({
       title: song.info.title,
       author: song.info.author,

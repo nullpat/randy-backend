@@ -1,8 +1,7 @@
 import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { sendMessage, editMessage } from "../helpers/helpers.js";
-import { addSong, connectPlayer, nowPlaying } from "../services/services.js";
-import { isFirstStartEvent, toggleFirstStartFalse } from "../services/firstStartEvent.js";
+import { addSong, connectPlayer } from "../services/services.js";
 
 const data = new SlashCommandBuilder()
   .setName("play")
@@ -10,13 +9,13 @@ const data = new SlashCommandBuilder()
   .addStringOption((option) => option.setName("song").setDescription("Enter song URL or search").setRequired(true));
 
 const execute = async (interaction, message, messageInput, youtubeFlag) => {
-  const songInput = message ? messageInput : interaction.options.getString("song");
-  const guildId = message ? message.guildId : interaction.guildId;
-  const channelId = message ? message.member.voice.channel?.id : interaction.member.voice.channel?.id;
-  const requesterId = message ? message.member : interaction.member;
+  const songInput = messageInput ?? interaction.options.getString("song");
+  const guildId = message?.guildId ?? interaction.guildId;
+  const channelId = message?.member.voice.channel?.id ?? interaction.member.voice.channel?.id;
+  const requesterId = message?.member ?? interaction.member;
 
-  const undoButton = new ButtonBuilder().setCustomId("undo").setLabel("Undo").setStyle(ButtonStyle.Secondary);
-  const actionRow = isFirstStartEvent ? null : new ActionRowBuilder().addComponents(undoButton);
+  const undoButton = new ButtonBuilder().setCustomId("undo").setLabel("Undo").setStyle(ButtonStyle.Danger);
+  const actionRow = new ActionRowBuilder().addComponents(undoButton);
 
   const youtubeSearch = youtubeFlag ?? interaction.commandName === "youtube";
 
@@ -25,7 +24,7 @@ const execute = async (interaction, message, messageInput, youtubeFlag) => {
       return await sendMessage(interaction, message, "You are not in a voice channel.");
     }
 
-    await connectPlayer(guildId, channelId);
+    await connectPlayer(guildId, channelId, channelId);
     const play = await addSong(guildId, songInput, requesterId, youtubeSearch);
     const response = await sendMessage(interaction, message, play, actionRow);
 

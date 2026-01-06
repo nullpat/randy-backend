@@ -8,8 +8,8 @@ const data = new SlashCommandBuilder()
   .setDescription("Removes the song currently at the bottom of the queue");
 
 const execute = async (interaction, message) => {
-  const guildId = message ? message.guildId : interaction.guildId;
-  const userId = message ? message.author.id : interaction.user.id;
+  const guildId = message?.guildId ?? interaction.guildId;
+  const userId = message?.author.id ?? interaction.user.id;
   const cancelButton = new ButtonBuilder().setCustomId("cancel").setLabel("Cancel").setStyle(ButtonStyle.Primary);
   const removeButton = new ButtonBuilder().setCustomId("remove").setLabel("Remove").setStyle(ButtonStyle.Danger);
   const row = new ActionRowBuilder().addComponents(cancelButton, removeButton);

@@ -6,7 +6,7 @@ import { pauseQueue } from "../services/services.js";
 const data = new SlashCommandBuilder().setName("pause").setDescription("Pauses playback");
 
 const execute = async (interaction, message) => {
-  const guildId = message ? message.guildId : interaction.guildId;
+  const guildId = message?.guildId ?? interaction.guildId;
 
   try {
     const pause = await pauseQueue(guildId);

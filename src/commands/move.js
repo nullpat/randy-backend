@@ -6,9 +6,9 @@ import { moveChannel } from "../services/services.js";
 const data = new SlashCommandBuilder().setName("move").setDescription("Moves to your current voice channel");
 
 const execute = async (interaction, message) => {
-  const guildId = message ? message.guildId : interaction.guildId;
-  const channelId = message ? message.member.voice.channel?.id : interaction.member.voice.channel?.id;
-  
+  const guildId = message?.guildId ?? interaction.guildId;
+  const channelId = message?.member.voice.channel?.id ?? interaction.member.voice.channel?.id;
+
   if (!channelId) {
     return await sendMessage(interaction, message, "You are not in a voice channel.");
   }

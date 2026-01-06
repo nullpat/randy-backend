@@ -8,7 +8,7 @@ const data = new SlashCommandBuilder()
   .setDescription("Removes all songs from the queue including whats currently playing");
 
 const execute = async (interaction, message) => {
-  const guildId = message ? message.guildId : interaction.guildId;
+  const guildId = message?.guildId ?? interaction.guildId;
 
   try {
     const clear = await clearQueue(guildId);

@@ -1,7 +1,7 @@
 import { Client, Collection, GatewayIntentBits } from "discord.js";
 import { readdirSync } from "fs";
 import { Aqua } from "aqualink";
-import { nowPlaying } from "./services/services.js";
+import { autoLeave, getOverride, nowPlaying } from "./services/services.js";
 
 const lavaHostname = process.env.LAVA_HOSTNAME;
 const lavaSecure = process.env.LAVA_SECURE === "true";
@@ -45,15 +45,19 @@ client.commands = new Collection();
 
 const eventFiles = readdirSync("./src/events");
 
-for (const eventFile of eventFiles) {
-  import(`#events/${eventFile}`).then((event) => {
+const loadEvents = async () => {
+  for (const eventFile of eventFiles) {
+    const event = await import(`#events/${eventFile}`);
+
     if (event.runOnce) {
       client.once(event.name, (...args) => event.execute(...args));
     } else {
       client.on(event.name, (...args) => event.execute(...args));
     }
-  });
-}
+  }
+};
+
+loadEvents();
 
 client.aqua.on("nodeConnect", (node) => {
   console.log(`Node connected: ${node.name}`);
@@ -63,14 +67,16 @@ client.aqua.on("nodeError", (node, error) => {
   console.log(`Node "${node.name}" encountered an error: ${error.message}.`);
 });
 
-client.aqua.on('trackStart', async (player, track) => {
-  await nowPlaying(player.guildId, true);
+client.aqua.on("trackStart", async (player, track) => {
+  await nowPlaying(player.guildId, track);
 });
 
-client.aqua.on("queueEnd", (player) => {
-  const channel = client.channels.cache.get(player.textChannel);
-  if (channel) channel.send("The queue has ended.");
-  player.destroy();
+client.aqua.on("queueEnd", async (player) => {
+  const override = getOverride(player.guildId);
+  const channel = client.channels.cache.get(override);
+
+  if (channel) channel.send("The queue has ended. Randy's warmth will leave you in 5 minutes.");
+  await autoLeave(player.guildId);
 });
 
 export default client;

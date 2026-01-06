@@ -1,17 +1,12 @@
 import errsole from "errsole";
 import client from "../musicbot.js";
-import { toggleFirstStartTrue } from "./firstStartEvent.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 import { editMessage } from "../helpers/helpers.js";
 
-const moveChannel = async (guildId, voiceId, textId) => {
-  // const player = client.aqua.createConnection({
-  //   guildId: guildId,
-  //   voiceChannel: voiceId,
-  //   textChannel: textId,
-  //   deaf: true,
-  // });
+const moveChannel = async (guildId, voiceId) => {
+  const player = await client.aqua.get(guildId);
+  await player.setVoiceChannel(voiceId);
   return "Joined voice channel.";
 };
 
@@ -22,6 +17,7 @@ const connectPlayer = async (guildId, voiceId, textId) => {
     textChannel: textId,
     deaf: true,
   });
+  return "Joined voice channel.";
 };
 
 const leaveChannel = async (guildId) => {
@@ -98,46 +94,19 @@ const getQueue = async (guildId) => {
 };
 
 const autoLeave = async (guildId) => {
-  let timeoutId = null;
-  let intervalId = null;
-  const timeoutValue = 60000;
-  const intervalValue = 5000;
+  const TIMEOUT = 7_000;
+  await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
 
-  const clearTimers = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      timeoutId = null;
+  try {
+    const player = await client.aqua.get(guildId);
+
+    if (!player.current) {
+      await leaveChannel(guildId);
+      client.user.setPresence({ activities: [{ name: "Listening to you sleep", type: 3 }] });
     }
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
-  };
-
-  const checkQueue = async (guildId) => {
-    try {
-      const queue = await getQueue(guildId);
-
-      if (queue.length === 0) {
-        if (!timeoutId) {
-          timeoutId = setTimeout(async () => {
-            clearTimers();
-            toggleFirstStartTrue();
-            await leaveChannel(guildId);
-          }, timeoutValue);
-        }
-      } else {
-        clearTimers();
-      }
-    } catch (error) {
-      errsole.warn(error.stack);
-      clearTimers();
-    }
-  };
-
-  intervalId = setInterval(async () => {
-    await checkQueue(guildId);
-  }, intervalValue);
+  } catch (err) {
+    errsole.warn(err.stack);
+  }
 };
 
 const pauseQueue = async (guildId) => {
@@ -193,7 +162,7 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
   };
 
   if (youtubeFlag) {
-    options.source = ytsearch;
+    options.source = "ytsearch";
   }
 
   const resolve = await client.aqua.resolve(options);
@@ -226,7 +195,7 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
   }
 };
 
-const nowPlaying = async (guildId, isFirstStartEvent) => {
+const getOverride = (guildId) => {
   const overrideChannels = [
     {
       guildId: "889971568732684298",
@@ -237,31 +206,28 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
       channelId: "708165175341088828",
     },
   ];
+
+  const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
+  return matchedOverride?.channelId;
+};
+
+const nowPlaying = async (guildId, track) => {
   try {
     const voiceData = await getVoice(guildId);
-    const queue = await getQueue(guildId);
-    const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
-    const selectedChannelId = matchedOverride ? matchedOverride.channelId : voiceData.channelId;
+    const overrideChannelId = getOverride(guildId);
+    const selectedChannelId = overrideChannelId ?? voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
     const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
-    const undoButton = new ButtonBuilder().setCustomId("undo").setLabel("Undo").setStyle(ButtonStyle.Secondary);
-    const undoRow = new ActionRowBuilder().addComponents(undoButton, queueButton, hjelpButton);
-    const normalRow = new ActionRowBuilder().addComponents(queueButton, hjelpButton);
-    const row = isFirstStartEvent ? undoRow : normalRow;
-
-    if (queue.length === 0) {
-      client.user.setPresence({ activities: [{ name: "Listening to you sleep", type: 3 }] });
-      // autoLeave(guildId);
-      return;
-    }
+    const row = new ActionRowBuilder().addComponents(queueButton, hjelpButton);
 
     if (!channel?.isTextBased()) {
       logger.error(`Channel Id must exist and allow text: ${voiceData.channelId}`);
       return;
     }
 
-    const { title, author, uri, artworkUrl } = queue[0];
+    const { title, author, uri, artworkUrl } = track;
+    const albumName = track.pluginInfo.albumName ?? "";
 
     const nowPlayingEmbed = new EmbedBuilder()
       .setTitle(title)
@@ -269,7 +235,10 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
       .setAuthor({
         name: "Now Playing",
       })
-      .setDescription(`${author}`)
+      .setDescription(
+        `${author}
+        ${albumName}`,
+      )
       .setThumbnail(artworkUrl)
       .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
 
@@ -277,11 +246,6 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
     client.user.setPresence({
       activities: [{ name: `Listening to ${title} - ${author}`, type: 2 }],
     });
-    if (isFirstStartEvent) {
-      setTimeout(() => {
-        editMessage(null, response, null, null, normalRow);
-      }, 5000);
-    }
   } catch (error) {
     logger.error(error.stack);
   }
@@ -311,6 +275,7 @@ const services = {
   clearQueue,
   skipSong,
   addSong,
+  getOverride,
   nowPlaying,
   getCommands,
   checkLast,
@@ -332,6 +297,7 @@ export {
   clearQueue,
   skipSong,
   addSong,
+  getOverride,
   nowPlaying,
   getCommands,
   checkLast,

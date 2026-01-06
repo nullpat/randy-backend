@@ -6,7 +6,7 @@ import { skipSong } from "../services/services.js";
 const data = new SlashCommandBuilder().setName("skip").setDescription("Skips the current song");
 
 const execute = async (interaction, message) => {
-  const guildId = message ? message.guildId : interaction.guildId;
+  const guildId = message?.guildId ?? interaction.guildId;
 
   try {
     const skip = await skipSong(guildId);
