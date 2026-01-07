@@ -3,7 +3,7 @@ import { logger } from "../utils/logger.js";
 import { sendMessage } from "../helpers/helpers.js";
 import { getQueue } from "../services/services.js";
 
-const data = new SlashCommandBuilder().setName("queue").setDescription("Displays a list of queued songs");
+const data = new SlashCommandBuilder().setName("queue").setDescription("Displays a list of songs in queue");
 
 const execute = async (interaction, message) => {
   const guildId = message?.guildId ?? interaction.guildId;
@@ -12,7 +12,7 @@ const execute = async (interaction, message) => {
     const queue = await getQueue(guildId);
 
     if (!queue || queue.length === 0) {
-      return await sendMessage(interaction, message, "The queue is empty.");
+      return await sendMessage(interaction, message, "The queue is empty");
     }
 
     const prettyQueue = queue.map((song) => ({

@@ -15,7 +15,7 @@ const execute = async (client) => {
     const { data, execute } = await import(`#commands/${command}`);
   
     if (!data || !execute) {
-      logger.error(`The ${command} command is missing "data" or "execute".`);
+      logger.error(`The ${command} command is missing "data" or "execute"`);
       continue;
     }
   
@@ -28,7 +28,7 @@ const execute = async (client) => {
       const data = await rest.put(Routes.applicationCommands(clientId), {
         body: commandData,
       });
-      console.log(`Successfully deployed ${data.length} application (/) commands.`);
+      console.log(`Successfully deployed ${data.length} application (/) commands`);
     } catch (error) {
       logger.error(error.stack);
     }

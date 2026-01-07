@@ -15,9 +15,8 @@ const execute = async (interaction, message, messageInput) => {
   const guildId = message?.guildId ?? interaction.guildId;
   const volumeInt = Number(volumeInput);
 
-  if (!Number.isInteger(volumeInt) || volume < 0 || volumeInt > 200) {
-    await sendMessage(interaction, message, "Invalid input. Enter a whole number between 0 and 200.");
-    return;
+  if (!volumeInt || !Number.isInteger(volumeInt) || volumeInt < 0 || volumeInt > 200) {
+    return await sendMessage(interaction, message, "Invalid input. Enter a whole number between 0 and 200");
   }
 
   try {

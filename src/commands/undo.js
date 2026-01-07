@@ -5,7 +5,7 @@ import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } fro
 
 const data = new SlashCommandBuilder()
   .setName("undo")
-  .setDescription("Removes the song currently at the bottom of the queue");
+  .setDescription("Removes the song most recently added to the queue");
 
 const execute = async (interaction, message) => {
   const guildId = message?.guildId ?? interaction.guildId;
@@ -35,7 +35,7 @@ const execute = async (interaction, message) => {
   try {
     const last = await checkLast(guildId);
     if (!last) {
-      await sendMessage(interaction, message, "Queue is already empty");
+      return await sendMessage(interaction, message, "Queue is already empty");
     }
 
     const response = await sendMessage(interaction, message, last, row, true);

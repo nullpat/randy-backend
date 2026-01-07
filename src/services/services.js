@@ -2,28 +2,21 @@ import errsole from "errsole";
 import client from "../musicbot.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
-import { editMessage } from "../helpers/helpers.js";
 
-const moveChannel = async (guildId, voiceId) => {
-  const player = await client.aqua.get(guildId);
-  await player.setVoiceChannel(voiceId);
-  return "Joined voice channel.";
-};
-
-const connectPlayer = async (guildId, voiceId, textId) => {
+const joinChannel = (guildId, voiceId, textId) => {
   const player = client.aqua.createConnection({
     guildId: guildId,
     voiceChannel: voiceId,
     textChannel: textId,
     deaf: true,
   });
-  return "Joined voice channel.";
+  return "Joined your voice channel";
 };
 
 const leaveChannel = async (guildId) => {
   await client.aqua.destroyPlayer(guildId);
   client.user.setPresence({ activities: [{ name: "Listening to you sleep", type: 3 }] });
-  return "Disconnected.";
+  return "Disconnected";
 };
 
 const changeVolume = async (guildId, volume) => {
@@ -94,7 +87,7 @@ const getQueue = async (guildId) => {
 };
 
 const autoLeave = async (guildId) => {
-  const TIMEOUT = 7_000;
+  const TIMEOUT = 300_000;
   await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
 
   try {
@@ -102,7 +95,6 @@ const autoLeave = async (guildId) => {
 
     if (!player.current) {
       await leaveChannel(guildId);
-      client.user.setPresence({ activities: [{ name: "Listening to you sleep", type: 3 }] });
     }
   } catch (err) {
     errsole.warn(err.stack);
@@ -112,19 +104,19 @@ const autoLeave = async (guildId) => {
 const pauseQueue = async (guildId) => {
   const player = await client.aqua.get(guildId);
   player.pause(true);
-  return "Paused the queue.";
+  return "Paused the queue";
 };
 
 const resumeQueue = async (guildId) => {
   const player = await client.aqua.get(guildId);
   player.pause(false);
-  return "Resumed the queue.";
+  return "Resumed the queue";
 };
 
 const clearQueue = async (guildId) => {
   const player = await client.aqua.get(guildId);
   player.queue.clear();
-  return "Cleared the queue.";
+  return "Cleared the queue";
 };
 
 const checkLast = async (guildId) => {
@@ -144,7 +136,7 @@ const removeLast = async (guildId) => {
   } else {
     player.queue = player.queue.slice(0, -1);
   }
-  return `Removed ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue.`;
+  return `Removed ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue`;
 };
 
 const skipSong = async (guildId) => {
@@ -187,7 +179,7 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
         player.play();
       }
 
-      return `Added **${track.title}** by ${track.author}.`;
+      return `Added **${track.title}** by ${track.author}`;
     }
 
     default:
@@ -214,8 +206,7 @@ const getOverride = (guildId) => {
 const nowPlaying = async (guildId, track) => {
   try {
     const voiceData = await getVoice(guildId);
-    const overrideChannelId = getOverride(guildId);
-    const selectedChannelId = overrideChannelId ?? voiceData.channelId;
+    const selectedChannelId = getOverride(guildId) ?? voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
     const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
@@ -254,15 +245,14 @@ const nowPlaying = async (guildId, track) => {
 const getCommands = () => {
   const commands = client.commands;
   const prettyCommands = commands.map((command) => ({
-    command: command.data.name,
+    name: command.data.name,
     description: command.data.description,
   }));
   return prettyCommands;
 };
 
 const services = {
-  moveChannel,
-  connectPlayer,
+  joinChannel,
   leaveChannel,
   changeVolume,
   getServers,
@@ -283,8 +273,7 @@ const services = {
 };
 
 export {
-  moveChannel,
-  connectPlayer,
+  joinChannel,
   leaveChannel,
   changeVolume,
   getServers,

@@ -64,7 +64,7 @@ client.aqua.on("nodeConnect", (node) => {
 });
 
 client.aqua.on("nodeError", (node, error) => {
-  console.log(`Node "${node.name}" encountered an error: ${error.message}.`);
+  console.log(`Node "${node.name}" encountered an error: ${error.message}`);
 });
 
 client.aqua.on("trackStart", async (player, track) => {
@@ -72,10 +72,10 @@ client.aqua.on("trackStart", async (player, track) => {
 });
 
 client.aqua.on("queueEnd", async (player) => {
-  const override = getOverride(player.guildId);
+  const override = getOverride(player.guildId) ?? player.textChannel;
   const channel = client.channels.cache.get(override);
 
-  if (channel) channel.send("The queue has ended. Randy's warmth will leave you in 5 minutes.");
+  if (channel) channel.send("The queue has ended. Randy's warmth will leave you in 5 minutes unless songs are added to the queue");
   await autoLeave(player.guildId);
 });
 

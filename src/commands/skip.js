@@ -10,8 +10,7 @@ const execute = async (interaction, message) => {
 
   try {
     const skip = await skipSong(guildId);
-    if (skip) await sendMessage(interaction, message, "Skipped song.");
-    else await sendMessage(interaction, message, "Failed to skip song. Likely 1 song in queue.");
+    if (skip) await sendMessage(interaction, message, "Skipped song");
   } catch (error) {
     logger.error(error.stack);
     await sendMessage(interaction, message, error.message);
