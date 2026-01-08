@@ -3,8 +3,19 @@ import client from "../musicbot.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 
+const moveChannel = (guildId, voiceId) => {
+  const player = client.aqua.get(guildId);
+  player.setVoiceChannel(voiceId);
+  return "Joined voice channel.";
+};
+
 const joinChannel = (guildId, voiceId, textId) => {
-  const player = client.aqua.createConnection({
+  const existing = client.aqua.players.get(guildId);
+  if (existing) {
+    return;
+  }
+
+  client.aqua.createConnection({
     guildId: guildId,
     voiceChannel: voiceId,
     textChannel: textId,
@@ -252,6 +263,7 @@ const getCommands = () => {
 };
 
 const services = {
+  moveChannel,
   joinChannel,
   leaveChannel,
   changeVolume,
@@ -273,6 +285,7 @@ const services = {
 };
 
 export {
+  moveChannel,
   joinChannel,
   leaveChannel,
   changeVolume,

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { sendMessage } from "../helpers/helpers.js";
-import { joinChannel } from "../services/services.js";
+import { moveChannel } from "../services/services.js";
 
 const data = new SlashCommandBuilder().setName("move").setDescription("Moves to your current voice channel");
 
@@ -14,7 +14,7 @@ const execute = async (interaction, message) => {
   }
 
   try {
-    const move = joinChannel(guildId, channelId, channelId);
+    const move = moveChannel(guildId, channelId, channelId);
     await sendMessage(interaction, message, move);
   } catch (error) {
     logger.error(error.stack);
