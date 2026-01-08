@@ -26,10 +26,10 @@ const execute = async (interaction, message) => {
 const createQueueEmbed = (queue) => {
   const queueText = queue
     .map((song, i) => {
-      const num = i + 1;
+      const position = i + 1;
       const title = song.info.title;
       const author = song.info.author;
-      return `${num}. ${title}\n${author}`;
+      return `${position}. ${title}\n${author}`;
     })
     .join("\n\n");
 
