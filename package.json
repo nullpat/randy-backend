@@ -12,7 +12,7 @@
     "#commands/*": "./src/commands/*"
   },
   "dependencies": {
-    "aqualink": "github:ToddyTheNoobDud/AquaLink#8e8a56b7fd362638ee33effe031962666a1d6d36",
+    "aqualink": "^2.17.3",
     "cors": "^2.8.5",
     "discord.js": "^14.25.1",
     "errsole": "^2.12.0",
