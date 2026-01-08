@@ -15,27 +15,22 @@ const execute = async (interaction, message) => {
       return await sendMessage(interaction, message, "The queue is empty");
     }
 
-    const queueEmbed = createQueueEmbed(queue);
+    const queueText = queue
+      .map((song, i) => {
+        const position = i + 1;
+        const title = song.info.title;
+        const author = song.info.author;
+        return `${position}. ${title}\n${author}`;
+      })
+      .join("\n\n");
+
+    const queueEmbed = new EmbedBuilder().setDescription(queueText);
+
     await sendMessage(interaction, message, null, queueEmbed);
   } catch (error) {
     logger.error(error.stack);
     await sendMessage(interaction, message, error.message);
   }
-};
-
-const createQueueEmbed = (queue) => {
-  const queueText = queue
-    .map((song, i) => {
-      const position = i + 1;
-      const title = song.info.title;
-      const author = song.info.author;
-      return `${position}. ${title}\n${author}`;
-    })
-    .join("\n\n");
-
-  const embed = new EmbedBuilder().setDescription(queueText);
-
-  return embed;
 };
 
 export { data, execute };
