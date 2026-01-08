@@ -30,7 +30,7 @@ const execute = async (interaction, message, messageInput, youtubeFlag) => {
 
     joinChannel(guildId, channelId, channelId);
     const play = await addSong(guildId, songInput, requesterId, youtubeSearch);
-    const response = await sendMessage(interaction, message, play, actionRow);
+    const response = await sendMessage(interaction, message, play, null, actionRow);
 
     setTimeout(async () => {
       await editMessage(interaction, response, play, null, "");

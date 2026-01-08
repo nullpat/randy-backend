@@ -38,7 +38,7 @@ const execute = async (interaction, message) => {
       return await sendMessage(interaction, message, "Queue is already empty");
     }
 
-    const response = await sendMessage(interaction, message, last, row, true);
+    const response = await sendMessage(interaction, message, last, null, row, true);
     await handleConfirmation(response, userId, guildId);
   } catch (error) {
     logger.error(error.stack);

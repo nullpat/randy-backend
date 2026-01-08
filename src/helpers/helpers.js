@@ -1,10 +1,14 @@
-const sendMessage = async (interaction, message, msgContent, row, withResponse) => {
+const sendMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
   const options = {};
 
   if (msgContent) {
     options.content = msgContent;
   }
 
+  if (msgEmbeds) {
+    options.embeds = [msgEmbeds];
+  }
+  
   if (row?.data) {
     options.components = [row];
   } else {

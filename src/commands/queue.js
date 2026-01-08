@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { sendMessage } from "../helpers/helpers.js";
 import { getQueue } from "../services/services.js";
@@ -15,18 +15,27 @@ const execute = async (interaction, message) => {
       return await sendMessage(interaction, message, "The queue is empty");
     }
 
-    const prettyQueue = queue.map((song) => ({
-      title: song.info.title,
-      author: song.info.author,
-      album: song.pluginInfo?.albumName,
-    }));
-    const prettierQueue = JSON.stringify(prettyQueue, null, 2);
-    const formattedQueue = `\`\`\`json\n${prettierQueue}\n\`\`\``;
-    await sendMessage(interaction, message, formattedQueue);
+    const queueEmbed = createQueueEmbed(queue);
+    await sendMessage(interaction, message, null, queueEmbed);
   } catch (error) {
     logger.error(error.stack);
     await sendMessage(interaction, message, error.message);
   }
+};
+
+const createQueueEmbed = (queue) => {
+  const queueText = queue
+    .map((song, i) => {
+      const num = i + 1;
+      const title = song.info.title;
+      const author = song.info.author;
+      return `${num}. ${title}\n${author}`;
+    })
+    .join("\n\n");
+
+  const embed = new EmbedBuilder().setDescription(queueText);
+
+  return embed;
 };
 
 export { data, execute };
