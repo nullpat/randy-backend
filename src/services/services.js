@@ -208,6 +208,10 @@ const getOverride = (guildId) => {
       guildId: "166740556947390465",
       channelId: "708165175341088828",
     },
+    {
+      guildId: "1207461053949284392",
+      channelId: "1207461053949284395",
+    },
   ];
 
   const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
