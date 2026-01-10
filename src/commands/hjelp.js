@@ -7,9 +7,22 @@ const data = new SlashCommandBuilder().setName("hjelp").setDescription("Displays
 
 const execute = async (interaction, message) => {
   try {
-    const hjelp = getCommands();
-    const prettierHjelp = JSON.stringify(hjelp, null, 2);
-    const formattedHjelp = `\`\`\`fix\nUse any command like >play or /skip or its first letter like >q or /l\n\`\`\`\`\`\`json\n${prettierHjelp}\n\`\`\``;
+    const commandListArray = getCommands();
+
+    const commandListString = commandListArray
+      .map((command) => `${command.name.padEnd(10)} - ${command.description}`)
+      .join("\n");
+
+    const formattedHjelp = [
+      "```",
+      "Available Commands",
+      "─".repeat(73),
+      "Use commands like >clear or /clear or just the first letter like >c or /c",
+      "",
+      commandListString,
+      "```",
+    ].join("\n");
+
     await sendMessage(interaction, message, formattedHjelp);
   } catch (error) {
     logger.error(error.stack);

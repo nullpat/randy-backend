@@ -1,10 +1,14 @@
-const sendMessage = async (interaction, message, msgContent, row, withResponse) => {
+const sendMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
   const options = {};
 
   if (msgContent) {
     options.content = msgContent;
   }
 
+  if (msgEmbeds) {
+    options.embeds = [msgEmbeds];
+  }
+  
   if (row?.data) {
     options.components = [row];
   } else {
@@ -64,19 +68,4 @@ const getComponent = async (response, msgFilter, msgTime) => {
   }
 };
 
-const formatSource = (sourceName) => {
-  switch (sourceName) {
-    case "youtube":
-      return "YouTube";
-    case "soundcloud":
-      return "SoundCloud";
-    case "deezer":
-      return "Deezer";
-    case "spotify":
-      return "Spotify";
-    default:
-      return sourceName;
-  }
-};
-
-export { sendMessage, editMessage, getComponent, formatSource };
+export { sendMessage, editMessage, getComponent };

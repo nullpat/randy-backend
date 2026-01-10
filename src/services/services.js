@@ -1,43 +1,40 @@
-import FastLink from "@performanc/fastlink";
 import errsole from "errsole";
-import { client } from "../musicbot.js";
-import { toggleFirstStartTrue } from "./firstStartEvent.js";
+import client from "../musicbot.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
-import { editMessage, formatSource } from "../helpers/helpers.js";
 
-const joinChannel = async (guildId, channelId) => {
-  const player = new FastLink.player.Player(guildId);
-  if (!player.playerCreated()) player.createPlayer();
-  player.connect(channelId, { mute: false, deaf: true }, (guildId, payload) => {
-    client.guilds.cache.get(guildId).shard.send(payload);
-  });
+const moveChannel = (guildId, voiceId) => {
+  const player = client.aqua.get(guildId);
+  player.setVoiceChannel(voiceId);
   return "Joined voice channel.";
 };
 
-const getPlayer = async (guildId) => {
-  const player = new FastLink.player.Player(guildId);
-  if (!player.playerCreated()) throw new Error("There is nothing playing.");
-  return player;
+const joinChannel = (guildId, voiceId, textId) => {
+  const existing = client.aqua.players.get(guildId);
+  if (existing) {
+    return;
+  }
+
+  client.aqua.createConnection({
+    guildId: guildId,
+    voiceChannel: voiceId,
+    textChannel: textId,
+    deaf: true,
+  });
+  return "Joined your voice channel";
 };
 
 const leaveChannel = async (guildId) => {
-  const player = await getPlayer(guildId);
-  player.connect(null, null, (guildId, payload) => {
-    client.guilds.cache.get(guildId).shard.send(payload);
-  });
-  player.destroy();
-  toggleFirstStartTrue();
-  client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
-  return "Disconnected.";
+  await client.aqua.destroyPlayer(guildId);
+  client.user.setPresence({ activities: [{ name: "Listening to you sleep", type: 3 }] });
+  return "Disconnected";
 };
 
 const changeVolume = async (guildId, volume) => {
-  const player = await getPlayer(guildId);
-  player.update({
-    volume: parseInt(volume),
-  });
-  return `Volume set to ${parseInt(volume)}`;
+  const volumeInt = parseInt(volume);
+  const player = await client.aqua.get(guildId);
+  player.setVolume(volumeInt);
+  return `Volume set to ${volumeInt}`;
 };
 
 const getServers = async () => {
@@ -47,15 +44,9 @@ const getServers = async () => {
 
 const getServer = async (guildId) => {
   const servers = client.guilds.cache;
-  const player = new FastLink.player.Player(guildId);
+  const player = await client.aqua.get(guildId);
 
-  let decodedQueue = [];
-  if (player.playerCreated()) {
-    const rawQueue = await player.getQueue();
-    if (rawQueue.length > 0) {
-      decodedQueue = await player.decodeTracks(rawQueue);
-    }
-  }
+  queue = player.getQueue();
 
   const serverInfo = servers
     .filter((server) => server.id === guildId)
@@ -86,7 +77,7 @@ const getServer = async (guildId) => {
 
   const finalServerInfo = serverInfo.map((server) => ({
     name: server.name,
-    queue: decodedQueue,
+    queue: queue,
     icon: iconURL,
     shortName: shortName,
   }));
@@ -101,146 +92,113 @@ const getVoice = async (guildId) => {
 };
 
 const getQueue = async (guildId) => {
-  const player = await getPlayer(guildId);
-  const rawQueue = await player.getQueue();
-  if (rawQueue.length === 0) {
-    return rawQueue;
-  }
-  const queue = await player.decodeTracks(rawQueue);
+  const player = await client.aqua.get(guildId);
+  const queue = await player.getQueue();
   return queue;
 };
 
 const autoLeave = async (guildId) => {
-  let timeoutId = null;
-  let intervalId = null;
-  const timeoutValue = 60000;
-  const intervalValue = 5000;
+  const TIMEOUT = 300_000;
+  await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
 
-  const clearTimers = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      timeoutId = null;
+  try {
+    const player = await client.aqua.get(guildId);
+
+    if (!player.current) {
+      await leaveChannel(guildId);
     }
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
-  };
-
-  const checkQueue = async (guildId) => {
-    try {
-      const queue = await getQueue(guildId);
-
-      if (queue.length === 0) {
-        if (!timeoutId) {
-          timeoutId = setTimeout(async () => {
-            clearTimers();
-            toggleFirstStartTrue();
-            await leaveChannel(guildId);
-          }, timeoutValue);
-        }
-      } else {
-        clearTimers();
-      }
-    } catch (error) {
-      errsole.warn(error.stack);
-      clearTimers();
-    }
-  };
-
-  intervalId = setInterval(async () => {
-    await checkQueue(guildId);
-  }, intervalValue);
+  } catch (err) {
+    errsole.warn(err.stack);
+  }
 };
 
 const pauseQueue = async (guildId) => {
-  const player = await getPlayer(guildId);
-  player.update({ paused: true });
-  return "Paused the queue.";
+  const player = await client.aqua.get(guildId);
+  player.pause(true);
+  return "Paused the queue";
 };
 
 const resumeQueue = async (guildId) => {
-  const player = await getPlayer(guildId);
-  player.update({ paused: false });
-  return "Resumed the queue.";
+  const player = await client.aqua.get(guildId);
+  player.pause(false);
+  return "Resumed the queue";
 };
 
 const clearQueue = async (guildId) => {
-  const player = await getPlayer(guildId);
-  player.update({ track: { encoded: null } });
-  toggleFirstStartTrue();
-  return "Cleared the queue.";
+  const player = await client.aqua.get(guildId);
+  player.queue.clear();
+  return "Cleared the queue";
 };
 
 const checkLast = async (guildId) => {
-  const player = await getPlayer(guildId);
-  const removedTrack = player.info.queue.slice(-1);
+  const player = await client.aqua.get(guildId);
+  const removedTrack = player.queue.slice(-1);
   if (removedTrack.length === 0) {
     return;
   }
-  const decodedTrack = await player.decodeTracks(removedTrack);
-
-  return `Are you sure you want to remove ${decodedTrack[0].info.title} by ${decodedTrack[0].info.author} from the queue?`;
+  return `Are you sure you want to remove ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue?`;
 };
 
 const removeLast = async (guildId) => {
-  const player = await getPlayer(guildId);
-  const removedTrack = player.info.queue.slice(-1);
-  const decodedTrack = await player.decodeTracks(removedTrack);
-  if (player.info.queue.length === 1) {
+  const player = await client.aqua.get(guildId);
+  const removedTrack = player.queue.slice(-1);
+  if (player.queue.length === 1) {
     clearQueue(guildId);
   } else {
-    player.info.queue = player.info.queue.slice(0, -1);
+    player.queue = player.queue.slice(0, -1);
   }
-  return `Removed ${decodedTrack[0].info.title} by ${decodedTrack[0].info.author} from the queue.`;
+  return `Removed ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue`;
 };
 
 const skipSong = async (guildId) => {
-  const player = await getPlayer(guildId);
-  const skip = player.skipTrack();
+  const player = await client.aqua.get(guildId);
+  const skip = player.skip();
   return skip;
 };
 
-const addSong = async (guildId, track, youtube) => {
-  const player = await getPlayer(guildId);
-  const loadPrefix = track.startsWith("https://") ? "" : youtube ? "ytsearch:" : "dzsearch:";
-  const load = await player.loadTrack(loadPrefix + track);
-  const { loadType, data } = load;
+const addSong = async (guildId, query, requester, youtubeFlag) => {
+  const player = await client.aqua.get(guildId);
+
+  const options = {
+    query: query,
+    requester: requester,
+  };
+
+  if (youtubeFlag) {
+    options.source = "ytsearch";
+  }
+
+  const resolve = await client.aqua.resolve(options);
+  const { loadType, tracks, playlistInfo, pluginInfo } = resolve;
 
   switch (loadType) {
-    case "playlist":
-    case "album":
-    case "station":
-    case "show":
-    case "podcast":
-    case "artist":
-      player.update({
-        tracks: { encodeds: data.tracks.map(({ encoded }) => encoded) },
-      });
-      const formattedPlaylistSource = formatSource(data.tracks[0].info.sourceName);
-      return `Added ${data.tracks.length} songs from ${formattedPlaylistSource}.`;
-
-    case "track":
-    case "short":
-      player.update({
-        track: { encoded: data.encoded },
-      });
-      const formattedTrackSource = formatSource(data.info.sourceName);
-      return `Added ${data.info.title} from ${formattedTrackSource}.`;
+    case "playlist": {
+      for (const track of tracks) {
+        player.queue.add(track);
+      }
+      if (!player.playing && !player.paused) {
+        player.play();
+      }
+      return `Added ${tracks.length} songs from **${playlistInfo.name}** by ${pluginInfo.author}`;
+    }
 
     case "search":
-      player.update({
-        track: { encoded: data[0].encoded },
-      });
-      const formattedSearchSource = formatSource(data[0].info.sourceName);
-      return `Added ${data[0].info.title} from ${formattedSearchSource} search.`;
+    case "track": {
+      const [track] = tracks;
+      player.queue.add(track);
+      if (!player.playing && !player.paused) {
+        player.play();
+      }
+
+      return `Added **${track.title}** by ${track.author}`;
+    }
 
     default:
       throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
   }
 };
 
-const nowPlaying = async (guildId, isFirstStartEvent) => {
+const getOverride = (guildId) => {
   const overrideChannels = [
     {
       guildId: "889971568732684298",
@@ -250,35 +208,34 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
       guildId: "166740556947390465",
       channelId: "708165175341088828",
     },
+    {
+      guildId: "1207461053949284392",
+      channelId: "1207461053949284395",
+    },
   ];
+
+  const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
+  return matchedOverride?.channelId;
+};
+
+const nowPlaying = async (guildId, track) => {
   try {
     const voiceData = await getVoice(guildId);
-    const queue = await getQueue(guildId);
-    const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
-    const selectedChannelId = matchedOverride ? matchedOverride.channelId : voiceData.channelId;
+    const selectedChannelId = getOverride(guildId) ?? voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
     const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
-    const undoButton = new ButtonBuilder().setCustomId("undo").setLabel("Undo").setStyle(ButtonStyle.Secondary);
-    const undoRow = new ActionRowBuilder().addComponents(undoButton, queueButton, hjelpButton);
-    const normalRow = new ActionRowBuilder().addComponents(queueButton, hjelpButton);
-    const row = isFirstStartEvent ? undoRow : normalRow;
-
-    if (queue.length === 0) {
-      client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
-      autoLeave(guildId);
-      return;
-    }
+    const row = new ActionRowBuilder().addComponents(queueButton, hjelpButton);
 
     if (!channel?.isTextBased()) {
       logger.error(`Channel Id must exist and allow text: ${voiceData.channelId}`);
       return;
     }
 
-    const { title, author, uri, artworkUrl } = queue[0].info;
-    const albumName = queue[0].pluginInfo.albumName || "";
+    const { title, author, uri, artworkUrl } = track;
+    const albumName = track.pluginInfo.albumName ?? "";
 
-    const nowPlaying = new EmbedBuilder()
+    const nowPlayingEmbed = new EmbedBuilder()
       .setTitle(title)
       .setURL(uri)
       .setAuthor({
@@ -291,15 +248,10 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
       .setThumbnail(artworkUrl)
       .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
 
-    const response = await channel.send({ embeds: [nowPlaying], components: [row] });
+    const response = await channel.send({ embeds: [nowPlayingEmbed], components: [row] });
     client.user.setPresence({
-      activities: [{ name: `${title} - ${author}`, type: 2 }],
+      activities: [{ name: `Listening to ${title} - ${author}`, type: 2 }],
     });
-    if (isFirstStartEvent) {
-      setTimeout(() => {
-        editMessage(null, response, null, null, normalRow);
-      }, 5000);
-    }
   } catch (error) {
     logger.error(error.stack);
   }
@@ -308,15 +260,15 @@ const nowPlaying = async (guildId, isFirstStartEvent) => {
 const getCommands = () => {
   const commands = client.commands;
   const prettyCommands = commands.map((command) => ({
-    command: command.data.name,
+    name: command.data.name,
     description: command.data.description,
   }));
   return prettyCommands;
 };
 
 const services = {
+  moveChannel,
   joinChannel,
-  getPlayer,
   leaveChannel,
   changeVolume,
   getServers,
@@ -329,6 +281,7 @@ const services = {
   clearQueue,
   skipSong,
   addSong,
+  getOverride,
   nowPlaying,
   getCommands,
   checkLast,
@@ -336,8 +289,8 @@ const services = {
 };
 
 export {
+  moveChannel,
   joinChannel,
-  getPlayer,
   leaveChannel,
   changeVolume,
   getServers,
@@ -350,6 +303,7 @@ export {
   clearQueue,
   skipSong,
   addSong,
+  getOverride,
   nowPlaying,
   getCommands,
   checkLast,

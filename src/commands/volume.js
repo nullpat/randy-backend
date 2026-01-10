@@ -5,18 +5,18 @@ import { changeVolume } from "../services/services.js";
 
 const data = new SlashCommandBuilder()
   .setName("volume")
-  .setDescription("Sets the volume to a number out of 100")
+  .setDescription("Sets the volume to a number out of 200")
   .addNumberOption((option) =>
-    option.setName("volume").setDescription("Sets the volume to a number out of 100").setRequired(true),
+    option.setName("volume").setDescription("Sets the volume to a number out of 200").setRequired(true),
   );
 
 const execute = async (interaction, message, messageInput) => {
-  const volumeInput = message ? messageInput : interaction.options.getNumber("volume");
-  const guildId = message ? message.guildId : interaction.guildId;
+  const volumeInput = messageInput ?? interaction.options.getNumber("volume");
+  const guildId = message?.guildId ?? interaction.guildId;
+  const volumeInt = Number(volumeInput);
 
-  if (!volumeInput || !(volumeInput >= 0 && volumeInput <= 100)) {
-    await sendMessage(interaction, message, "Invalid input. Enter a number out of 100");
-    return;
+  if (!volumeInt || !Number.isInteger(volumeInt) || volumeInt < 0 || volumeInt > 200) {
+    return await sendMessage(interaction, message, "Invalid input. Enter a whole number between 0 and 200");
   }
 
   try {

@@ -1,41 +1,12 @@
-import FastLink from "@performanc/fastlink";
-import { nowPlaying } from "../services/services.js";
+import client from "../musicbot.js";
 
 const name = "raw";
 const runOnce = false;
 
-const lavaHostname = process.env.LAVA_HOSTNAME;
-const lavaSecure = process.env.LAVA_SECURE === "true";
-const lavaPassword = process.env.LAVA_PASSWORD;
-const lavaPort = process.env.LAVA_PORT;
-const botId = process.env.DISCORD_CLIENT_ID;
-
-const lavaClient = FastLink.node.connectNodes(
-  [
-    {
-      hostname: lavaHostname,
-      secure: lavaSecure,
-      password: lavaPassword,
-      port: lavaPort,
-    },
-  ],
-  {
-    botId,
-    shards: 1,
-    queue: true,
-  },
-);
-
-lavaClient.on("raw", async (data) => {
-  if (data.type === "TrackEndEvent") {
-    nowPlaying(data.guildId);
-  } else {
-    return;
-  }
-});
-
-const execute = async (data) => {
-  FastLink.other.handleRaw(data);
+const execute = async (d, t) => {
+  if (d.t === "VOICE_SERVER_UPDATE" || d.t === "VOICE_STATE_UPDATE") {
+    return client.aqua.updateVoiceState(d, t);
+}
 };
 
 export { name, runOnce, execute };

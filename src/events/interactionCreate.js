@@ -20,7 +20,7 @@ const handleChatInputCommand = async (interaction) => {
   const command = interaction.client.commands.get(interaction.commandName);
 
   if (!command) {
-    logger.error(`No command matching ${interaction.commandName} was found.`);
+    logger.error(`No command matching ${interaction.commandName} was found`);
     return;
   }
 
