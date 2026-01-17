@@ -24,6 +24,7 @@ const execute = async (message) => {
   const messageInput = trimmedContent.split(" ").slice(1).join(" ");
 
   switch (commandName) {
+    case "b":
     case "bd":
     case "bday":
     case "birthday":
