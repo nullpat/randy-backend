@@ -10,16 +10,17 @@ const token = process.env.DISCORD_TOKEN;
 const rest = new REST().setToken(token);
 
 const execute = async (client) => {
-  const commandFiles = readdirSync("./src/commands");
+  const commands = readdirSync("./src/commands");
 
-  for (const commandFile of commandFiles) {
-    import(`#commands/${commandFile}`).then((command) => {
-      if (command.data && command.execute) {
-        client.commands.set(command.data.name, command);
-      } else {
-        logger.error(`The ${commandFile} command is missing a required "data" or "execute" property.`);
-      }
-    });
+  for (const command of commands) {
+    const { data, execute } = await import(`#commands/${command}`);
+  
+    if (!data || !execute) {
+      logger.error(`The ${command} command is missing "data" or "execute"`);
+      continue;
+    }
+  
+    client.commands.set(data.name, { data, execute });
   }
 
   const deployCommands = async () => {
@@ -28,15 +29,18 @@ const execute = async (client) => {
       const data = await rest.put(Routes.applicationCommands(clientId), {
         body: commandData,
       });
-      console.log(`Successfully deployed ${data.length} application (/) commands.`);
+      console.log(`Successfully deployed ${data.length} application (/) commands`);
     } catch (error) {
       logger.error(error.stack);
     }
   };
 
   setTimeout(deployCommands, 1000);
-  client.user.setPresence({ activities: [{ name: "you sleep", type: 3 }] });
+  client.user.setPresence({ activities: [{ name: "Watching you sleep", type: 3 }] });
+
   checkBirthdays();
+  client.aqua.init(client.user.id);
+  console.log(`Logged in as ${client.user.tag}`);
 };
 
 export { name, runOnce, execute };
