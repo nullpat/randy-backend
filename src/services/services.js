@@ -35,9 +35,9 @@ const leaveChannel = async (guildId) => {
 };
 
 const changeVolume = (guildId, volume) => {
-  const volumeInt = parseInt(volume);
+  const volumeInt = Number(volume);
   if (!Number.isFinite(volumeInt)) {
-    throw new ValidationError("Volume must be a finite number");
+    throw new ValidationError("Volume must be a valid number");
   }
   const player = client.aqua.get(guildId);
   if (!player) {
@@ -132,7 +132,7 @@ const autoLeave = async (guildId) => {
   try {
     const player = client.aqua.get(guildId);
 
-    if (!player.current) {
+    if (!player || !player.current) {
       await leaveChannel(guildId);
     }
   } catch (err) {
@@ -186,7 +186,7 @@ const removeLast = (guildId) => {
   }
   const removedTrack = player.queue.slice(-1);
   if (removedTrack.length === 0) {
-    throw new ServiceError("Queue is empty, nothing to remove");
+    throw new ApplicationError("Queue is empty, nothing to remove");
   }
   if (player.queue.length === 1) {
     clearQueue(guildId);
@@ -272,7 +272,13 @@ const getOverride = (guildId) => {
 
 const nowPlaying = async (guildId, track) => {
   try {
-    const voiceData = getVoice(guildId);
+    let voiceData;
+    try {
+      voiceData = getVoice(guildId);
+    } catch (error) {
+      logger.error(`Failed to get voice data for guild ${guildId}: ${error.message}`);
+      return;
+    }
     const selectedChannelId = getOverride(guildId) ?? voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);

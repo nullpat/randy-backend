@@ -170,7 +170,7 @@ const addSong = async (req, res, next) => {
     return;
   }
   try {
-    const add = await services.addSong(guildId, track);
+    const add = await services.addSong(guildId, track, null, false);
     res.status(200).send(add);
   } catch (error) {
     next(error);
