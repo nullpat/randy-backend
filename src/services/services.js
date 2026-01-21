@@ -2,17 +2,21 @@ import errsole from "errsole";
 import client from "../musicbot.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
+import { ApplicationError, ValidationError } from "../utils/errors.js";
 
 const moveChannel = (guildId, voiceId) => {
   const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
   player.setVoiceChannel(voiceId);
-  return "Joined voice channel.";
+  return "Joined your voice channel";
 };
 
 const joinChannel = (guildId, voiceId, textId) => {
   const existing = client.aqua.players.get(guildId);
   if (existing) {
-    return;
+    return "Already connected to a voice channel in this guild";
   }
 
   client.aqua.createConnection({
@@ -30,30 +34,45 @@ const leaveChannel = async (guildId) => {
   return "Disconnected";
 };
 
-const changeVolume = async (guildId, volume) => {
+const changeVolume = (guildId, volume) => {
   const volumeInt = parseInt(volume);
-  const player = await client.aqua.get(guildId);
+  if (!Number.isFinite(volumeInt)) {
+    throw new ValidationError("Volume must be a finite number");
+  }
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
   player.setVolume(volumeInt);
-  return `Volume set to ${volumeInt}`;
+  return `Volume set to ${volumeInt}%`;
 };
 
-const getServers = async () => {
+const getServers = () => {
   const servers = client.guilds.cache;
   return servers;
 };
 
-const getServer = async (guildId) => {
+const getServer = (guildId) => {
   const servers = client.guilds.cache;
-  const player = await client.aqua.get(guildId);
+  const guild = servers.get(guildId);
 
-  queue = player.getQueue();
+  if (!guild) {
+    throw new ApplicationError("Invalid guild ID provided");
+  }
+
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    throw new ApplicationError("Player is not connected to a voice channel in this guild");
+  }
+
+  const queue = player.getQueue();
 
   const serverInfo = servers
     .filter((server) => server.id === guildId)
     .map((server) => ({
       id: server.id,
       name: server.name,
-      queue: decodedQueue,
+      queue: queue,
       icon: server.icon,
     }));
 
@@ -85,15 +104,24 @@ const getServer = async (guildId) => {
   return singleServerInfo;
 };
 
-const getVoice = async (guildId) => {
+const getVoice = (guildId) => {
   const guild = client.guilds.cache.get(guildId);
+  if (!guild) {
+    throw new ApplicationError("Invalid guild ID provided");
+  }
   const member = guild.members.cache.get(process.env.DISCORD_CLIENT_ID);
+  if (!member) {
+    throw new ApplicationError("Failed to get cached bot status");
+  }
   return member.voice;
 };
 
-const getQueue = async (guildId) => {
-  const player = await client.aqua.get(guildId);
-  const queue = await player.getQueue();
+const getQueue = (guildId) => {
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
+  const queue = player.getQueue();
   return queue;
 };
 
@@ -102,7 +130,7 @@ const autoLeave = async (guildId) => {
   await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
 
   try {
-    const player = await client.aqua.get(guildId);
+    const player = client.aqua.get(guildId);
 
     if (!player.current) {
       await leaveChannel(guildId);
@@ -112,26 +140,38 @@ const autoLeave = async (guildId) => {
   }
 };
 
-const pauseQueue = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const pauseQueue = (guildId) => {
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
   player.pause(true);
   return "Paused the queue";
 };
 
-const resumeQueue = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const resumeQueue = (guildId) => {
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
   player.pause(false);
   return "Resumed the queue";
 };
 
-const clearQueue = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const clearQueue = (guildId) => {
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
   player.queue.clear();
   return "Cleared the queue";
 };
 
-const checkLast = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const checkLast = (guildId) => {
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
   const removedTrack = player.queue.slice(-1);
   if (removedTrack.length === 0) {
     return;
@@ -139,9 +179,15 @@ const checkLast = async (guildId) => {
   return `Are you sure you want to remove ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue?`;
 };
 
-const removeLast = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const removeLast = (guildId) => {
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
   const removedTrack = player.queue.slice(-1);
+  if (removedTrack.length === 0) {
+    throw new ServiceError("Queue is empty, nothing to remove");
+  }
   if (player.queue.length === 1) {
     clearQueue(guildId);
   } else {
@@ -150,14 +196,20 @@ const removeLast = async (guildId) => {
   return `Removed ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue`;
 };
 
-const skipSong = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const skipSong = (guildId) => {
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
   const skip = player.skip();
   return skip;
 };
 
 const addSong = async (guildId, query, requester, youtubeFlag) => {
-  const player = await client.aqua.get(guildId);
+  const player = client.aqua.get(guildId);
+  if (!player) {
+    return "Player is not connected to a voice channel in this guild";
+  }
 
   const options = {
     query: query,
@@ -220,7 +272,7 @@ const getOverride = (guildId) => {
 
 const nowPlaying = async (guildId, track) => {
   try {
-    const voiceData = await getVoice(guildId);
+    const voiceData = getVoice(guildId);
     const selectedChannelId = getOverride(guildId) ?? voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
