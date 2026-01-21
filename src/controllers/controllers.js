@@ -35,7 +35,7 @@ const changeVolume = async (req, res, next) => {
     return;
   }
   try {
-    const change = await services.changeVolume(guildId, volume);
+    const change = services.changeVolume(guildId, volume);
     res.status(200).send(change);
   } catch (error) {
     next(error);
@@ -44,7 +44,7 @@ const changeVolume = async (req, res, next) => {
 
 const getServers = async (req, res, next) => {
   try {
-    const servers = await services.getServers();
+    const servers = services.getServers();
     res.status(200).send(servers);
   } catch (error) {
     next(error);
@@ -58,7 +58,7 @@ const getServer = async (req, res, next) => {
     return;
   }
   try {
-    const server = await services.getServer(guildId);
+    const server = services.getServer(guildId);
     res.status(200).send(server);
   } catch (error) {
     next(error);
@@ -72,7 +72,7 @@ const getVoice = async (req, res, next) => {
     return;
   }
   try {
-    const voice = await services.getVoice(guildId);
+    const voice = services.getVoice(guildId);
     res.status(200).send(voice);
   } catch (error) {
     next(error);
@@ -114,7 +114,7 @@ const resumeQueue = async (req, res, next) => {
     return;
   }
   try {
-    const resume = await services.resumeQueue(guildId);
+    const resume = services.resumeQueue(guildId);
     res.status(200).send(resume);
   } catch (error) {
     next(error);
@@ -128,7 +128,7 @@ const clearQueue = async (req, res, next) => {
     return;
   }
   try {
-    const clear = await services.clearQueue(guildId);
+    const clear = services.clearQueue(guildId);
     res.status(200).send(clear);
   } catch (error) {
     next(error);
@@ -142,7 +142,7 @@ const removeLast = async (req, res, next) => {
     return;
   }
   try {
-    const remove = await services.removeLast(guildId);
+    const remove = services.removeLast(guildId);
     res.status(200).send(remove);
   } catch (error) {
     next(error);
