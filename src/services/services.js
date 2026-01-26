@@ -204,7 +204,7 @@ const checkLast = (guildId) => {
   const player = getPlayer(guildId);
   const removedTrack = player.queue._items.slice(-1);
   if (removedTrack.length === 0) {
-    return;
+    throw new ApplicationError("Queue is already empty, nothing to remove");
   }
   return `Are you sure you want to remove ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue?`;
 };
@@ -213,7 +213,7 @@ const removeLast = (guildId) => {
   const player = getPlayer(guildId);
   const removedTrack = player.queue.slice(-1);
   if (removedTrack.length === 0) {
-    throw new ApplicationError("Queue is empty, nothing to remove");
+    throw new ApplicationError("Queue is already empty, nothing to remove");
   }
   if (player.queue.length === 1) {
     clearQueue(guildId);

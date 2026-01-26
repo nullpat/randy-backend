@@ -33,11 +33,7 @@ const execute = async (interaction, message) => {
   };
 
   try {
-    const last = await checkLast(guildId);
-    if (!last) {
-      return await sendMessage(interaction, message, "Queue is already empty");
-    }
-
+    const last = checkLast(guildId);
     const response = await sendMessage(interaction, message, last, null, row, true);
     await handleConfirmation(response, userId, guildId);
   } catch (error) {
