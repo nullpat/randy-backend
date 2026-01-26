@@ -7,7 +7,7 @@ import birthdayList from "../../dummybirthdays.js";
 import cron from "node-cron";
 
 const AUTO_LEAVE_TIMEOUT = 300_000;
-const OVERRIDE_CHANNELS = [
+const NOWPLAYING_OVERRIDE_CHANNELS = [
   {
     guildId: "889971568732684298",
     channelId: "1139615420400291851",
@@ -22,6 +22,21 @@ const OVERRIDE_CHANNELS = [
   },
 ];
 
+const BIRTHDAY_OVERRIDE_CHANNELS = [
+  {
+    guildId: "889971568732684298",
+    channelId: "1139615420400291851",
+  },
+  // {
+  //   guildId: "166740556947390465",
+  //   channelId: "708172723955695657",
+  // },
+  {
+    guildId: "1207461053949284392",
+    channelId: "1207461053949284395",
+  },
+];
+
 const getPlayer = (guildId) => {
   const player = client.aqua.players.get(guildId);
   if (!player) {
@@ -30,11 +45,8 @@ const getPlayer = (guildId) => {
   return player;
 };
 
-
 const checkBirthdays = () => {
-  // cron.schedule("0 22 * * *", () => {
-  // checks every minute for testing below
-  cron.schedule("* * * * *", () => {
+  cron.schedule("0 22 * * *", () => {
     const today = new Date();
 
     const month = today.getMonth() + 1;
@@ -57,10 +69,10 @@ const sendBirthdays = async (birthdayPerson) => {
   for (const member of channelMembers.values()) {
     if (member.id !== birthdayPerson.userId && member.id !== client.application.id) {
       const recipient = await client.users.fetch(member.id);
-      const birthdayMessage = `${birthdayPerson.name}'s birthday is coming up on ${birthdayPerson.month}/${birthdayPerson.day}! Make sure to send them a message`
+      const birthdayMessage = `${birthdayPerson.name}'s birthday is coming up on ${birthdayPerson.month}/${birthdayPerson.day}! Make sure to send them a message`;
       await recipient.send(birthdayMessage);
     }
-  };
+  }
 };
 
 const moveChannel = (guildId, voiceId) => {
@@ -260,28 +272,13 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
   }
 };
 
-const getOverride = (guildId) => {
-  const matchedOverride = OVERRIDE_CHANNELS.find((override) => override.guildId === guildId);
+const getNowPlayingOverride = (guildId) => {
+  const matchedOverride = NOWPLAYING_OVERRIDE_CHANNELS.find((override) => override.guildId === guildId);
   return matchedOverride?.channelId;
 };
 
 const getBirthdayOverride = (guildId) => {
-  const overrideChannels = [
-    {
-      guildId: "889971568732684298",
-      channelId: "1139615420400291851",
-    },
-    // {
-    //   guildId: "166740556947390465",
-    //   channelId: "708172723955695657",
-    // },
-    {
-      guildId: "1207461053949284392",
-      channelId: "1207461053949284395",
-    },
-  ];
-
-  const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
+  const matchedOverride = BIRTHDAY_OVERRIDE_CHANNELS.find((override) => override.guildId === guildId);
   return matchedOverride?.channelId;
 };
 
@@ -294,7 +291,7 @@ const nowPlaying = async (guildId, track) => {
       logger.error(`Failed to get voice data for guild ${guildId}: ${error.message}`);
       return;
     }
-    const selectedChannelId = getOverride(guildId) ?? voiceData.channelId;
+    const selectedChannelId = getNowPlayingOverride(guildId) ?? voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
     const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
@@ -356,7 +353,7 @@ const services = {
   clearQueue,
   skipSong,
   addSong,
-  getOverride,
+  getNowPlayingOverride,
   nowPlaying,
   getCommands,
   checkLast,
@@ -380,7 +377,7 @@ export {
   clearQueue,
   skipSong,
   addSong,
-  getOverride,
+  getNowPlayingOverride,
   nowPlaying,
   getCommands,
   checkLast,
