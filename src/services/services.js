@@ -165,8 +165,7 @@ const getVoice = (guildId) => {
 
 const getQueue = (guildId) => {
   const player = getPlayer(guildId);
-  const queue = player.getQueue();
-  return queue;
+  return player.queue;
 };
 
 const autoLeave = async (guildId) => {
@@ -203,7 +202,7 @@ const clearQueue = (guildId) => {
 
 const checkLast = (guildId) => {
   const player = getPlayer(guildId);
-  const removedTrack = player.queue.slice(-1);
+  const removedTrack = player.queue._items.slice(-1);
   if (removedTrack.length === 0) {
     return;
   }
@@ -253,7 +252,11 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
       if (!player.playing && !player.paused) {
         player.play();
       }
-      return `Added ${tracks.length} songs from **${playlistInfo.name}** by ${pluginInfo.author}`;
+
+      return {
+        message: `Added ${tracks.length} songs from **${playlistInfo.name}** by ${pluginInfo.author}`,
+        success: true,
+      };
     }
 
     case "search":
@@ -264,7 +267,14 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
         player.play();
       }
 
-      return `Added **${track.title}** by ${track.author}`;
+      return { message: `Added **${track.title}** by ${track.author}`, success: true };
+    }
+
+    case "empty": {
+      const [track] = tracks;
+      player.queue.add(track);
+
+      return { message: `Shockingly, your search for **${query}** returned no results!`, success: false };
     }
 
     default:

@@ -10,12 +10,12 @@ const execute = async (interaction, message) => {
 
   try {
     const queue = await getQueue(guildId);
-
-    if (!queue || queue.length === 0) {
+    
+    if (!queue || queue._items.length === 0) {
       return await sendMessage(interaction, message, "The queue is empty");
     }
 
-    const queueText = queue
+    const queueText = queue._items
       .map((song, i) => {
         const position = i + 1;
         const title = song.info.title;

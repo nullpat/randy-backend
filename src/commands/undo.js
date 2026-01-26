@@ -19,7 +19,7 @@ const execute = async (interaction, message) => {
       const collectorFilter = (i) => i.user.id === userId;
       const confirmation = await getComponent(response, collectorFilter, 15_000);
       if (confirmation.customId === "remove") {
-        const remove = await removeLast(guildId);
+        const remove = removeLast(guildId);
         await confirmation.update({
           content: remove,
           components: [],
