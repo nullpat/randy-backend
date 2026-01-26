@@ -25,10 +25,10 @@ const execute = async (interaction, message) => {
           components: [],
         });
       } else if (confirmation.customId === "cancel") {
-        await confirmation.update({ content: "Undo cancelled.", components: [] });
+        await confirmation.update({ content: "Undo cancelled", components: [] });
       }
     } catch {
-      await editMessage(interaction, response, "Undo confirmation not received.", null, "");
+      await editMessage(interaction, response, "Undo confirmation not received", null, "");
     }
   };
 
