@@ -2,6 +2,40 @@ import errsole from "errsole";
 import client from "../musicbot.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
+import birthdayList from "../../dummybirthdays.js";
+import cron from "node-cron";
+
+const checkBirthdays = () => {
+  // cron.schedule("0 22 * * *", () => {
+  // checks every minute for testing below
+  cron.schedule("* * * * *", () => {
+    const today = new Date();
+
+    const month = today.getMonth() + 1;
+    const day = today.getDate() + 1;
+
+    birthdayList.forEach((user) => {
+      if (user.month == month && user.day == day) {
+        sendBirthdays(user);
+      }
+    });
+  });
+};
+
+const sendBirthdays = async (birthdayPerson) => {
+  console.log(birthdayPerson);
+
+  const channelId = getBirthdayOverride(birthdayPerson.serverId);
+  const channel = await client.channels.fetch(channelId);
+  const channelMembers = channel.members;
+  for (const member of channelMembers.values()) {
+    if (member.id !== birthdayPerson.userId && member.id !== client.application.id) {
+      const recipient = await client.users.fetch(member.id);
+      const birthdayMessage = `${birthdayPerson.name}'s birthday is coming up on ${birthdayPerson.month}/${birthdayPerson.day}! Make sure to send them a message`
+      await recipient.send(birthdayMessage);
+    }
+  };
+};
 
 const moveChannel = (guildId, voiceId) => {
   const player = client.aqua.get(guildId);
@@ -218,6 +252,26 @@ const getOverride = (guildId) => {
   return matchedOverride?.channelId;
 };
 
+const getBirthdayOverride = (guildId) => {
+  const overrideChannels = [
+    {
+      guildId: "889971568732684298",
+      channelId: "1139615420400291851",
+    },
+    // {
+    //   guildId: "166740556947390465",
+    //   channelId: "708172723955695657",
+    // },
+    {
+      guildId: "1207461053949284392",
+      channelId: "1207461053949284395",
+    },
+  ];
+
+  const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
+  return matchedOverride?.channelId;
+};
+
 const nowPlaying = async (guildId, track) => {
   try {
     const voiceData = await getVoice(guildId);
@@ -267,6 +321,8 @@ const getCommands = () => {
 };
 
 const services = {
+  checkBirthdays,
+  sendBirthdays,
   moveChannel,
   joinChannel,
   leaveChannel,
@@ -289,6 +345,8 @@ const services = {
 };
 
 export {
+  checkBirthdays,
+  sendBirthdays,
   moveChannel,
   joinChannel,
   leaveChannel,
