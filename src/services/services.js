@@ -37,10 +37,29 @@ const BIRTHDAY_OVERRIDE_CHANNELS = [
   },
 ];
 
-const getPlayer = (guildId) => {
+const getPlayer1 = (guildId) => {
   const player = client.aqua.players.get(guildId);
   if (!player) {
     throw new ApplicationError("Player is not connected to a voice channel in this guild");
+  }
+  return player;
+};
+
+const getPlayer2 = (guildId) => {
+  const player = client.aqua.players.get(guildId);
+  if (!player) {
+    return {
+      message: `Player is not connected to a voice channel in this guild`,
+      success: false,
+    };
+  }
+  return { player, success: true };
+};
+
+const getPlayer3 = (guildId) => {
+  const player = client.aqua.players.get(guildId);
+  if (!player) {
+    return null;
   }
   return player;
 };
@@ -274,11 +293,11 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
       const [track] = tracks;
       player.queue.add(track);
 
-      return { message: `Shockingly, your search for **${query}** returned no results!`, success: false };
+      return { message: `Shockingly, your search for **${query}** returned no results`, success: false };
     }
 
     default:
-      throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
+      throw new Error(`Failed to add song to queue. LoadType: ${loadType}`);
   }
 };
 
