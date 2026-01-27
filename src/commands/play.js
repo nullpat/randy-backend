@@ -8,7 +8,7 @@ const data = new SlashCommandBuilder()
   .setDescription("Adds song to queue by URL or name (Shortcut is >> not >p because of pause command)")
   .addStringOption((option) => option.setName("song").setDescription("Enter song URL or name").setRequired(true));
 
-UNDO_TIMEOUT = 5_000;
+const UNDO_TIMEOUT = 5_000;
 
 const execute = async (interaction, message, messageInput, youtubeFlag) => {
   const songInput = messageInput ?? interaction.options.getString("song");

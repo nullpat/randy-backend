@@ -1,4 +1,4 @@
-const sendMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
+export const sendMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
   const options = {};
 
   if (msgContent) {
@@ -8,7 +8,7 @@ const sendMessage = async (interaction, message, msgContent, msgEmbeds, row, wit
   if (msgEmbeds) {
     options.embeds = [msgEmbeds];
   }
-  
+
   if (row?.data) {
     options.components = [row];
   } else {
@@ -26,7 +26,7 @@ const sendMessage = async (interaction, message, msgContent, msgEmbeds, row, wit
   }
 };
 
-const editMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
+export const editMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
   const options = {};
 
   if (msgContent) {
@@ -53,19 +53,3 @@ const editMessage = async (interaction, message, msgContent, msgEmbeds, row, wit
     return await message.edit(options);
   }
 };
-
-const getComponent = async (response, msgFilter, msgTime) => {
-  const options = { filter: msgFilter };
-
-  if (msgTime) {
-    options.time = msgTime;
-  }
-
-  if (response.resource) {
-    return await response.resource.message.awaitMessageComponent(options);
-  } else {
-    return await response.awaitMessageComponent(options);
-  }
-};
-
-export { sendMessage, editMessage, getComponent };

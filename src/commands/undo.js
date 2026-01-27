@@ -1,5 +1,5 @@
 import { logger } from "../utils/logger.js";
-import { sendMessage, editMessage, getComponent } from "../helpers/helpers.js";
+import { sendMessage, editMessage } from "../helpers/helpers.js";
 import { checkLast, removeLast } from "../services/services.js";
 import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 
@@ -17,13 +17,10 @@ const execute = async (interaction, message) => {
   const handleConfirmation = async (response, userId, guildId) => {
     try {
       const collectorFilter = (i) => i.user.id === userId;
-      const confirmation = await getComponent(response, collectorFilter, 15_000);
+      const confirmation = await response.resource.message.awaitMessageComponent({ filter: collectorFilter, time: 15_000 });
       if (confirmation.customId === "remove") {
-        const remove = removeLast(guildId);
-        await confirmation.update({
-          content: remove,
-          components: [],
-        });
+        const removeResultMsg = removeLast(guildId);
+        await confirmation.update({ content: removeResultMsg, components: [] });
       } else if (confirmation.customId === "cancel") {
         await confirmation.update({ content: "Undo cancelled", components: [] });
       }
