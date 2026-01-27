@@ -1,5 +1,5 @@
 import { logger } from "../utils/logger.js";
-import { sendMessage, editMessage } from "../helpers/helpers.js";
+import { sendMessage, editMessage, getComponent } from "../helpers/helpers.js";
 import { checkLast, removeLast } from "../services/services.js";
 import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
 
@@ -13,29 +13,36 @@ const execute = async (interaction, message) => {
   const cancelButton = new ButtonBuilder().setCustomId("cancel").setLabel("Cancel").setStyle(ButtonStyle.Primary);
   const removeButton = new ButtonBuilder().setCustomId("remove").setLabel("Remove").setStyle(ButtonStyle.Danger);
   const row = new ActionRowBuilder().addComponents(cancelButton, removeButton);
+  let confirmation;
 
-  const handleConfirmation = async (response, userId, guildId) => {
+  const handleConfirmation = async (interaction, response, userId, guildId) => {
+    const collectorFilter = (i) => i.user.id === userId;
+
     try {
-      const collectorFilter = (i) => i.user.id === userId;
-      const confirmation = await response.resource.message.awaitMessageComponent({ filter: collectorFilter, time: 15_000 });
-      if (confirmation.customId === "remove") {
-        const removeResultMsg = removeLast(guildId);
-        await confirmation.update({ content: removeResultMsg, components: [] });
-      } else if (confirmation.customId === "cancel") {
-        await confirmation.update({ content: "Undo cancelled", components: [] });
-      }
+      confirmation = await getComponent(response, collectorFilter, 15_000);
     } catch {
       await editMessage(interaction, response, "Undo confirmation not received", null, "");
+    }
+
+    if (confirmation.customId === "remove") {
+      const removeResultMsg = removeLast(guildId);
+
+      await confirmation.update({ content: removeResultMsg, components: [] });
+    } else if (confirmation.customId === "cancel") {
+      await confirmation.update({ content: "Undo cancelled", components: [] });
     }
   };
 
   try {
     const last = checkLast(guildId);
     const response = await sendMessage(interaction, message, last, null, row, true);
-    await handleConfirmation(response, userId, guildId);
+    await handleConfirmation(interaction, response, userId, guildId);
   } catch (error) {
     logger.error(error.stack);
-    await sendMessage(interaction, message, error.message);
+    await confirmation.update({
+      content: process.env.NODE_ENV !== "production" ? error.message : "Internal Server Error",
+      components: [],
+    });
   }
 };
 

@@ -230,7 +230,7 @@ const checkLast = (guildId) => {
 
 const removeLast = (guildId) => {
   const player = getPlayer(guildId);
-  const lastTrack = player.queue._items.slice(-1);
+  const lastTrack = player.queue._item.slice(-1);
   
   if (lastTrack.length === 0) {
     throw new ApplicationError("Queue is already empty, nothing to remove");
