@@ -10,20 +10,17 @@ const data = new SlashCommandBuilder()
 const execute = async (interaction, message) => {
   const guildId = message?.guildId ?? interaction.guildId;
   const userId = message?.author?.id ?? interaction.user.id;
-
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId("cancel").setLabel("Cancel").setStyle(ButtonStyle.Primary),
     new ButtonBuilder().setCustomId("remove").setLabel("Remove").setStyle(ButtonStyle.Danger),
   );
-
   let response;
 
   try {
     const last = checkLast(guildId);
-
     response = await sendMessage(interaction, message, last, null, row, true);
-
     let confirmation;
+
     try {
       confirmation = await getComponent(response, (i) => i.user.id === userId, 15_000);
     } catch {
@@ -39,12 +36,12 @@ const execute = async (interaction, message) => {
 
     if (confirmation.customId === "remove") {
       const removeResultMsg = removeLast(guildId);
-
       await confirmation.update({
         content: removeResultMsg,
         components: [],
       });
     }
+
   } catch (error) {
     logger.error(error.stack);
     const content = process.env.NODE_ENV !== "production" ? error.message : "Internal Server Error";
