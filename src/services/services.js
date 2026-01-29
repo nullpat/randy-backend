@@ -235,10 +235,10 @@ const removeLast = (guildId) => {
   if (lastTrack.length === 0) {
     throw new ApplicationError("Queue is already empty, nothing to remove");
   }
-  if (player.queue.length === 1) {
+  if (player.queue._items.length === 1) {
     clearQueue(guildId);
   } else {
-    player.queue = player.queue._items.slice(0, -1);
+    player.queue._items = player.queue._items.slice(0, -1);
   }
   return `Removed ${lastTrack[0].info.title} by ${lastTrack[0].info.author} from the queue`;
 };
@@ -291,9 +291,6 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
     }
 
     case "empty": {
-      const [track] = tracks;
-      player.queue.add(track);
-
       return { message: `Shockingly, your search for **${query}** returned no results`, success: false };
     }
 
