@@ -1,4 +1,4 @@
-const sendMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
+export const sendMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
   const options = {};
 
   if (msgContent) {
@@ -26,7 +26,7 @@ const sendMessage = async (interaction, message, msgContent, msgEmbeds, row, wit
   }
 };
 
-const editMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
+export const editMessage = async (interaction, message, msgContent, msgEmbeds, row, withResponse) => {
   const options = {};
 
   if (msgContent) {
@@ -54,7 +54,7 @@ const editMessage = async (interaction, message, msgContent, msgEmbeds, row, wit
   }
 };
 
-const getComponent = async (response, msgFilter, msgTime) => {
+export const getComponent = async (response, msgFilter, msgTime) => {
   const options = { filter: msgFilter };
 
   if (msgTime) {
@@ -67,5 +67,3 @@ const getComponent = async (response, msgFilter, msgTime) => {
     return await response.awaitMessageComponent(options);
   }
 };
-
-export { sendMessage, editMessage, getComponent };

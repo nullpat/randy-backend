@@ -37,10 +37,29 @@ const BIRTHDAY_OVERRIDE_CHANNELS = [
   },
 ];
 
+// const getPlayer1 = (guildId) => {
+//   const player = client.aqua.players.get(guildId);
+//   if (!player) {
+//     throw new ApplicationError("Player is not connected to a voice channel in this guild");
+//   }
+//   return player;
+// };
+
+// const getPlayer2 = (guildId) => {
+//   const player = client.aqua.players.get(guildId);
+//   if (!player) {
+//     return {
+//       message: `Player is not connected to a voice channel in this guild`,
+//       success: false,
+//     };
+//   }
+//   return { player, success: true };
+// };
+
 const getPlayer = (guildId) => {
   const player = client.aqua.players.get(guildId);
   if (!player) {
-    throw new ApplicationError("Player is not connected to a voice channel in this guild");
+    return null;
   }
   return player;
 };
@@ -202,25 +221,26 @@ const clearQueue = (guildId) => {
 
 const checkLast = (guildId) => {
   const player = getPlayer(guildId);
-  const removedTrack = player.queue._items.slice(-1);
-  if (removedTrack.length === 0) {
-    return;
+  const lastTrack = player.queue._items.slice(-1);
+  if (lastTrack.length === 0) {
+    throw new ApplicationError("Queue is already empty, nothing to remove");
   }
-  return `Are you sure you want to remove ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue?`;
+  return `Are you sure you want to remove ${lastTrack[0].info.title} by ${lastTrack[0].info.author} from the queue?`;
 };
 
 const removeLast = (guildId) => {
   const player = getPlayer(guildId);
-  const removedTrack = player.queue.slice(-1);
-  if (removedTrack.length === 0) {
-    throw new ApplicationError("Queue is empty, nothing to remove");
+  const lastTrack = player.queue._items.slice(-1);
+  
+  if (lastTrack.length === 0) {
+    throw new ApplicationError("Queue is already empty, nothing to remove");
   }
-  if (player.queue.length === 1) {
+  if (player.queue._items.length === 1) {
     clearQueue(guildId);
   } else {
-    player.queue = player.queue.slice(0, -1);
+    player.queue._items = player.queue._items.slice(0, -1);
   }
-  return `Removed ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue`;
+  return `Removed ${lastTrack[0].info.title} by ${lastTrack[0].info.author} from the queue`;
 };
 
 const skipSong = (guildId) => {
@@ -271,14 +291,11 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
     }
 
     case "empty": {
-      const [track] = tracks;
-      player.queue.add(track);
-
-      return { message: `Shockingly, your search for **${query}** returned no results!`, success: false };
+      return { message: `Shockingly, your search for **${query}** returned no results`, success: false };
     }
 
     default:
-      throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
+      throw new Error(`Failed to add song to queue. LoadType: ${loadType}`);
   }
 };
 

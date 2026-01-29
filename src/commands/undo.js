@@ -9,40 +9,47 @@ const data = new SlashCommandBuilder()
 
 const execute = async (interaction, message) => {
   const guildId = message?.guildId ?? interaction.guildId;
-  const userId = message?.author.id ?? interaction.user.id;
-  const cancelButton = new ButtonBuilder().setCustomId("cancel").setLabel("Cancel").setStyle(ButtonStyle.Primary);
-  const removeButton = new ButtonBuilder().setCustomId("remove").setLabel("Remove").setStyle(ButtonStyle.Danger);
-  const row = new ActionRowBuilder().addComponents(cancelButton, removeButton);
-
-  const handleConfirmation = async (response, userId, guildId) => {
-    try {
-      const collectorFilter = (i) => i.user.id === userId;
-      const confirmation = await getComponent(response, collectorFilter, 15_000);
-      if (confirmation.customId === "remove") {
-        const remove = removeLast(guildId);
-        await confirmation.update({
-          content: remove,
-          components: [],
-        });
-      } else if (confirmation.customId === "cancel") {
-        await confirmation.update({ content: "Undo cancelled.", components: [] });
-      }
-    } catch {
-      await editMessage(interaction, response, "Undo confirmation not received.", null, "");
-    }
-  };
+  const userId = message?.author?.id ?? interaction.user.id;
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId("cancel").setLabel("Cancel").setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId("remove").setLabel("Remove").setStyle(ButtonStyle.Danger),
+  );
+  let response;
 
   try {
-    const last = await checkLast(guildId);
-    if (!last) {
-      return await sendMessage(interaction, message, "Queue is already empty");
+    const last = checkLast(guildId);
+    response = await sendMessage(interaction, message, last, null, row, true);
+    let confirmation;
+
+    try {
+      confirmation = await getComponent(response, (i) => i.user.id === userId, 15_000);
+    } catch {
+      await editMessage(interaction, response, "Undo confirmation not received", null, "");
     }
 
-    const response = await sendMessage(interaction, message, last, null, row, true);
-    await handleConfirmation(response, userId, guildId);
+    if (confirmation.customId === "cancel") {
+      await confirmation.update({
+        content: "Undo cancelled",
+        components: [],
+      });
+    }
+
+    if (confirmation.customId === "remove") {
+      const removeResultMsg = removeLast(guildId);
+      await confirmation.update({
+        content: removeResultMsg,
+        components: [],
+      });
+    }
+
   } catch (error) {
     logger.error(error.stack);
-    await sendMessage(interaction, message, error.message);
+    const content = process.env.NODE_ENV !== "production" ? error.message : "Internal Server Error";
+    if (response) {
+      await editMessage(interaction, response, content, null, "");
+    } else {
+      await sendMessage(interaction, message, content);
+    }
   }
 };
 

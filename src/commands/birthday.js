@@ -10,7 +10,7 @@ const execute = async (interaction, message) => {
 
   try {
 
-    if (!birthdayList) throw new Error("No birthday list found.");
+    if (!birthdayList) throw new Error("No birthday list found");
     const guildBirthdayList = birthdayList.filter((user) => user.serverId === guildId);
 
     const guildBirthdayString = guildBirthdayList
