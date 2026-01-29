@@ -2,13 +2,70 @@ import errsole from "errsole";
 import client from "../musicbot.js";
 import { logger } from "../utils/logger.js";
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
+import { ApplicationError, ValidationError } from "../utils/errors.js";
 import birthdayList from "../../dummybirthdays.js";
 import cron from "node-cron";
 
+const AUTO_LEAVE_TIMEOUT = 300_000;
+const NOWPLAYING_OVERRIDE_CHANNELS = [
+  {
+    guildId: "889971568732684298",
+    channelId: "1139615420400291851",
+  },
+  {
+    guildId: "166740556947390465",
+    channelId: "708165175341088828",
+  },
+  {
+    guildId: "1207461053949284392",
+    channelId: "1207461053949284395",
+  },
+];
+
+const BIRTHDAY_OVERRIDE_CHANNELS = [
+  {
+    guildId: "889971568732684298",
+    channelId: "1139615420400291851",
+  },
+  // {
+  //   guildId: "166740556947390465",
+  //   channelId: "708172723955695657",
+  // },
+  {
+    guildId: "1207461053949284392",
+    channelId: "1207461053949284395",
+  },
+];
+
+// const getPlayer1 = (guildId) => {
+//   const player = client.aqua.players.get(guildId);
+//   if (!player) {
+//     throw new ApplicationError("Player is not connected to a voice channel in this guild");
+//   }
+//   return player;
+// };
+
+// const getPlayer2 = (guildId) => {
+//   const player = client.aqua.players.get(guildId);
+//   if (!player) {
+//     return {
+//       message: `Player is not connected to a voice channel in this guild`,
+//       success: false,
+//     };
+//   }
+//   return { player, success: true };
+// };
+
+const getPlayer = (guildId) => {
+  const player = client.aqua.players.get(guildId);
+  if (!player) {
+    return null;
+  }
+  return player;
+};
+
 const checkBirthdays = () => {
-  // cron.schedule("0 22 * * *", () => {
-  // checks every minute for testing below
-  cron.schedule("* * * * *", () => {
+  cron.schedule("0 22 * * *", () => {
     const today = new Date();
 
     const month = today.getMonth() + 1;
@@ -31,16 +88,16 @@ const sendBirthdays = async (birthdayPerson) => {
   for (const member of channelMembers.values()) {
     if (member.id !== birthdayPerson.userId && member.id !== client.application.id) {
       const recipient = await client.users.fetch(member.id);
-      const birthdayMessage = `${birthdayPerson.name}'s birthday is coming up on ${birthdayPerson.month}/${birthdayPerson.day}! Make sure to send them a message`
+      const birthdayMessage = `${birthdayPerson.name}'s birthday is coming up on ${birthdayPerson.month}/${birthdayPerson.day}! Make sure to send them a message`;
       await recipient.send(birthdayMessage);
     }
-  };
+  }
 };
 
 const moveChannel = (guildId, voiceId) => {
-  const player = client.aqua.get(guildId);
+  const player = getPlayer(guildId);
   player.setVoiceChannel(voiceId);
-  return "Joined voice channel.";
+  return "Joined your voice channel";
 };
 
 const joinChannel = (guildId, voiceId, textId) => {
@@ -64,81 +121,79 @@ const leaveChannel = async (guildId) => {
   return "Disconnected";
 };
 
-const changeVolume = async (guildId, volume) => {
-  const volumeInt = parseInt(volume);
-  const player = await client.aqua.get(guildId);
+const changeVolume = (guildId, volume) => {
+  const volumeInt = Number(volume);
+  if (!Number.isFinite(volumeInt)) {
+    throw new ValidationError("Volume must be a valid number");
+  }
+  const player = getPlayer(guildId);
   player.setVolume(volumeInt);
-  return `Volume set to ${volumeInt}`;
+  return `Volume set to ${volumeInt}%`;
 };
 
-const getServers = async () => {
+const getServers = () => {
   const servers = client.guilds.cache;
   return servers;
 };
 
-const getServer = async (guildId) => {
-  const servers = client.guilds.cache;
-  const player = await client.aqua.get(guildId);
+const getServer = (guildId) => {
+  const guild = client.guilds.cache.get(guildId);
 
-  queue = player.getQueue();
+  if (!guild) {
+    throw new ApplicationError("Invalid guild ID provided");
+  }
 
-  const serverInfo = servers
-    .filter((server) => server.id === guildId)
-    .map((server) => ({
-      id: server.id,
-      name: server.name,
-      queue: decodedQueue,
-      icon: server.icon,
-    }));
+  const player = getPlayer(guildId);
+  const queue = player.getQueue();
 
-  const iconURL = serverInfo[0].icon
-    ? `https://cdn.discordapp.com/icons/${serverInfo[0].id}/${serverInfo[0].icon}.png`
-    : null;
+  const iconURL = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : null;
 
-  const shortName = serverInfo[0].name
+  const shortName = guild.name
     .match(/\b\w|\W+/g)
-    .map((name) => {
-      if (/\w/.test(name)) {
-        return name.charAt(0).toUpperCase();
+    .map((namePart) => {
+      if (/\w/.test(namePart)) {
+        return namePart.charAt(0).toUpperCase();
       }
-      if (name.trim() === "") {
+      if (namePart.trim() === "") {
         return "";
       }
-      return name;
+      return namePart;
     })
     .join("")
     .replace("'S", "");
 
-  const finalServerInfo = serverInfo.map((server) => ({
-    name: server.name,
-    queue: queue,
+  return {
+    name: guild.name,
+    queue,
     icon: iconURL,
-    shortName: shortName,
-  }));
-  const singleServerInfo = finalServerInfo[0];
-  return singleServerInfo;
+    shortName,
+  };
 };
 
-const getVoice = async (guildId) => {
+const getVoice = (guildId) => {
   const guild = client.guilds.cache.get(guildId);
+  if (!guild) {
+    throw new ApplicationError("Invalid guild ID provided");
+  }
   const member = guild.members.cache.get(process.env.DISCORD_CLIENT_ID);
+  if (!member) {
+    throw new ApplicationError("Failed to get cached bot status");
+  }
   return member.voice;
 };
 
-const getQueue = async (guildId) => {
-  const player = await client.aqua.get(guildId);
-  const queue = await player.getQueue();
-  return queue;
+const getQueue = (guildId) => {
+  const player = getPlayer(guildId);
+  return player.queue;
 };
 
 const autoLeave = async (guildId) => {
-  const TIMEOUT = 300_000;
-  await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
+  await new Promise((resolve) => setTimeout(resolve, AUTO_LEAVE_TIMEOUT));
 
   try {
-    const player = await client.aqua.get(guildId);
+    const player = client.aqua.players.get(guildId);
 
-    if (!player.current) {
+    if (!player || !player.current) {
       await leaveChannel(guildId);
     }
   } catch (err) {
@@ -146,52 +201,56 @@ const autoLeave = async (guildId) => {
   }
 };
 
-const pauseQueue = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const pauseQueue = (guildId) => {
+  const player = getPlayer(guildId);
   player.pause(true);
   return "Paused the queue";
 };
 
-const resumeQueue = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const resumeQueue = (guildId) => {
+  const player = getPlayer(guildId);
   player.pause(false);
   return "Resumed the queue";
 };
 
-const clearQueue = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const clearQueue = (guildId) => {
+  const player = getPlayer(guildId);
   player.queue.clear();
   return "Cleared the queue";
 };
 
-const checkLast = async (guildId) => {
-  const player = await client.aqua.get(guildId);
-  const removedTrack = player.queue.slice(-1);
-  if (removedTrack.length === 0) {
-    return;
+const checkLast = (guildId) => {
+  const player = getPlayer(guildId);
+  const lastTrack = player.queue._items.slice(-1);
+  if (lastTrack.length === 0) {
+    throw new ApplicationError("Queue is already empty, nothing to remove");
   }
-  return `Are you sure you want to remove ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue?`;
+  return `Are you sure you want to remove ${lastTrack[0].info.title} by ${lastTrack[0].info.author} from the queue?`;
 };
 
-const removeLast = async (guildId) => {
-  const player = await client.aqua.get(guildId);
-  const removedTrack = player.queue.slice(-1);
-  if (player.queue.length === 1) {
+const removeLast = (guildId) => {
+  const player = getPlayer(guildId);
+  const lastTrack = player.queue._items.slice(-1);
+  
+  if (lastTrack.length === 0) {
+    throw new ApplicationError("Queue is already empty, nothing to remove");
+  }
+  if (player.queue._items.length === 1) {
     clearQueue(guildId);
   } else {
-    player.queue = player.queue.slice(0, -1);
+    player.queue._items = player.queue._items.slice(0, -1);
   }
-  return `Removed ${removedTrack[0].info.title} by ${removedTrack[0].info.author} from the queue`;
+  return `Removed ${lastTrack[0].info.title} by ${lastTrack[0].info.author} from the queue`;
 };
 
-const skipSong = async (guildId) => {
-  const player = await client.aqua.get(guildId);
+const skipSong = (guildId) => {
+  const player = getPlayer(guildId);
   const skip = player.skip();
   return skip;
 };
 
 const addSong = async (guildId, query, requester, youtubeFlag) => {
-  const player = await client.aqua.get(guildId);
+  const player = getPlayer(guildId);
 
   const options = {
     query: query,
@@ -213,7 +272,11 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
       if (!player.playing && !player.paused) {
         player.play();
       }
-      return `Added ${tracks.length} songs from **${playlistInfo.name}** by ${pluginInfo.author}`;
+
+      return {
+        message: `Added ${tracks.length} songs from **${playlistInfo.name}** by ${pluginInfo.author}`,
+        success: true,
+      };
     }
 
     case "search":
@@ -224,58 +287,38 @@ const addSong = async (guildId, query, requester, youtubeFlag) => {
         player.play();
       }
 
-      return `Added **${track.title}** by ${track.author}`;
+      return { message: `Added **${track.title}** by ${track.author}`, success: true };
+    }
+
+    case "empty": {
+      return { message: `Shockingly, your search for **${query}** returned no results`, success: false };
     }
 
     default:
-      throw new Error(`Failed to add to queue. LoadType: ${loadType}`);
+      throw new Error(`Failed to add song to queue. LoadType: ${loadType}`);
   }
 };
 
-const getOverride = (guildId) => {
-  const overrideChannels = [
-    {
-      guildId: "889971568732684298",
-      channelId: "1139615420400291851",
-    },
-    {
-      guildId: "166740556947390465",
-      channelId: "708165175341088828",
-    },
-    {
-      guildId: "1207461053949284392",
-      channelId: "1207461053949284395",
-    },
-  ];
-
-  const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
+const getNowPlayingOverride = (guildId) => {
+  const matchedOverride = NOWPLAYING_OVERRIDE_CHANNELS.find((override) => override.guildId === guildId);
   return matchedOverride?.channelId;
 };
 
 const getBirthdayOverride = (guildId) => {
-  const overrideChannels = [
-    {
-      guildId: "889971568732684298",
-      channelId: "1139615420400291851",
-    },
-    // {
-    //   guildId: "166740556947390465",
-    //   channelId: "708172723955695657",
-    // },
-    {
-      guildId: "1207461053949284392",
-      channelId: "1207461053949284395",
-    },
-  ];
-
-  const matchedOverride = overrideChannels.find((override) => override.guildId === guildId);
+  const matchedOverride = BIRTHDAY_OVERRIDE_CHANNELS.find((override) => override.guildId === guildId);
   return matchedOverride?.channelId;
 };
 
 const nowPlaying = async (guildId, track) => {
   try {
-    const voiceData = await getVoice(guildId);
-    const selectedChannelId = getOverride(guildId) ?? voiceData.channelId;
+    let voiceData;
+    try {
+      voiceData = getVoice(guildId);
+    } catch (error) {
+      logger.error(`Failed to get voice data for guild ${guildId}: ${error.message}`);
+      return;
+    }
+    const selectedChannelId = getNowPlayingOverride(guildId) ?? voiceData.channelId;
     const channel = client.channels.cache.get(selectedChannelId);
     const queueButton = new ButtonBuilder().setCustomId("queue").setLabel("Show Queue").setStyle(ButtonStyle.Primary);
     const hjelpButton = new ButtonBuilder().setCustomId("hjelp").setLabel("Hjelp").setStyle(ButtonStyle.Primary);
@@ -300,7 +343,7 @@ const nowPlaying = async (guildId, track) => {
         ${albumName}`,
       )
       .setThumbnail(artworkUrl)
-      .setImage("https://raw.githubusercontent.com/nullpat/randy-backend/refs/heads/main/line.png");
+      .setImage(process.env.NOW_PLAYING_LINE_IMAGE);
 
     const response = await channel.send({ embeds: [nowPlayingEmbed], components: [row] });
     client.user.setPresence({
@@ -337,7 +380,7 @@ const services = {
   clearQueue,
   skipSong,
   addSong,
-  getOverride,
+  getNowPlayingOverride,
   nowPlaying,
   getCommands,
   checkLast,
@@ -361,7 +404,7 @@ export {
   clearQueue,
   skipSong,
   addSong,
-  getOverride,
+  getNowPlayingOverride,
   nowPlaying,
   getCommands,
   checkLast,

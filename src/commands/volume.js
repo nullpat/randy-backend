@@ -20,7 +20,7 @@ const execute = async (interaction, message, messageInput) => {
   }
 
   try {
-    const volume = await changeVolume(guildId, volumeInput);
+    const volume = changeVolume(guildId, volumeInput);
     await sendMessage(interaction, message, volume);
   } catch (error) {
     logger.error(error.stack);

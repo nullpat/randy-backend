@@ -1,7 +1,7 @@
 import { Client, Collection, GatewayIntentBits } from "discord.js";
 import { readdirSync } from "fs";
 import { Aqua } from "aqualink";
-import { autoLeave, getOverride, nowPlaying } from "./services/services.js";
+import { autoLeave, getNowPlayingOverride, nowPlaying } from "./services/services.js";
 
 const lavaHostname = process.env.LAVA_HOSTNAME;
 const lavaSecure = process.env.LAVA_SECURE === "true";
@@ -72,7 +72,7 @@ client.aqua.on("trackStart", async (player, track) => {
 });
 
 client.aqua.on("queueEnd", async (player) => {
-  const override = getOverride(player.guildId) ?? player.textChannel;
+  const override = getNowPlayingOverride(player.guildId) ?? player.textChannel;
   const channel = client.channels.cache.get(override);
 
   if (channel) channel.send("The queue has ended. Randy's warmth will leave you in 5 minutes unless songs are added to the queue");

@@ -9,7 +9,7 @@ const execute = async (interaction, message) => {
   const guildId = message?.guildId ?? interaction.guildId;
 
   try {
-    const pause = await pauseQueue(guildId);
+    const pause = pauseQueue(guildId);
     await sendMessage(interaction, message, pause);
   } catch (error) {
     logger.error(error.stack);
