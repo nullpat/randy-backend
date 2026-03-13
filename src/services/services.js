@@ -213,6 +213,13 @@ const resumeQueue = (guildId) => {
   return "Resumed the queue";
 };
 
+const shuffleQueue = (guildId) => {
+  const player = getPlayer(guildId);
+  const queue = player.queue._items;
+  const shuffledQueue = queue.sort(() => Math.random() - 0.5);
+  return shuffledQueue;
+}
+
 const clearQueue = (guildId) => {
   const player = getPlayer(guildId);
   player.queue.clear();
@@ -381,6 +388,7 @@ const services = {
   skipSong,
   addSong,
   getNowPlayingOverride,
+  shuffleQueue,
   nowPlaying,
   getCommands,
   checkLast,
@@ -405,6 +413,7 @@ export {
   skipSong,
   addSong,
   getNowPlayingOverride,
+  shuffleQueue,
   nowPlaying,
   getCommands,
   checkLast,
